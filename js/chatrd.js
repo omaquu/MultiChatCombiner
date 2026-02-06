@@ -52,8 +52,10 @@ let chatMessageShadowColor = getURLParam("chatMessageShadowColor", "#000000");
 let chatMessageShadowBlur = getURLParam("chatMessageShadowBlur", 0);
 let chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
 let chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
+let chatMessageWatery = getURLParam("chatMessageWatery", false);
 
 const chatContainer = document.querySelector('#chat');
+
 const chatTemplate = document.querySelector('#chat-message');
 const eventTemplate = document.querySelector('#event-message');
 
@@ -101,20 +103,20 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     removeExtraChatMessages();
 
     let chatmodtwitch = `<div class="chatmoderation">
-                <button onclick="executeModCommand(event, '/deletemessage ${messageid}')" title="Remove Message"><i class="fa-solid fa-trash-can"></i></button>
-                <button onclick="executeModCommand(event, '/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
-                <button onclick="executeModCommand(event, '/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
-            </div>`;
+            <button onclick="executeModCommand(event, '/deletemessage ${messageid}')" title="Remove Message"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="executeModCommand(event, '/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
+            <button onclick="executeModCommand(event, '/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
+        </div>`;
 
     let chatmodyoutube = `<div class="chatmoderation">
-                <button onclick="executeModCommand(event, '/yt/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
-                <button onclick="executeModCommand(event, '/yt/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
-            </div>`;
+            <button onclick="executeModCommand(event, '/yt/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
+            <button onclick="executeModCommand(event, '/yt/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
+        </div>`;
 
     let chatmodkick = `<div class="chatmoderation">
-                <button onclick="executeModCommand(event, '/kick/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
-                <button onclick="executeModCommand(event, '/kick/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
-            </div>`;
+            <button onclick="executeModCommand(event, '/kick/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
+            <button onclick="executeModCommand(event, '/kick/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
+        </div>`;
 
     if (showSpeakerbot == true && speakerBotChatRead == true) { speakerBotTTSRead(clone, 'chat'); }
 
@@ -134,6 +136,10 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
     root.style.setProperty('--text-glow-color', chatMessageGlowColor);
     root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
+
+    if (chatMessageWatery) {
+        root.querySelector('.actual-message').classList.add('watery-text');
+    }
 
     if (chatBubbles) {
         root.classList.add('chat-bubble');
@@ -290,7 +296,7 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         item.style[dimensionProp.toLowerCase()] = itemDimension + 'px';
         item.style.opacity = '1';
     });
-
+ 
     item.addEventListener('transitionend', () => {
         item.style[dimensionProp.toLowerCase()] = '';
         item.style.opacity = '';
@@ -381,7 +387,7 @@ function addEventItem(platform, clone, classes, userid, messageid) {
         item.style[dimensionProp.toLowerCase()] = itemDimension + 'px';
         item.style.opacity = '1';
     });
-
+ 
     item.addEventListener('transitionend', () => {
         item.style[dimensionProp.toLowerCase()] = '';
         item.style.opacity = '';
@@ -542,16 +548,16 @@ function formatSubMonthDuration(months) {
     /*if (months < 12) {
         return `${months} ${months === 1 ? 'Month' : 'Months'}`;
     }
-
+ 
     const years = Math.floor(months / 12);
     const remainingMonths = months % 12;
-
+ 
     const yearText = `${years} ${years === 1 ? 'Year' : 'Years'}`;
-
+ 
     const monthText = remainingMonths > 0 
         ? ` and ${remainingMonths} ${remainingMonths === 1 ? 'Month' : 'Months'}`
         : '';
-
+ 
     return `${yearText}${monthText}`;*/
     return `${months} ${months === 1 ? 'Month' : 'Months'}`;
 }
