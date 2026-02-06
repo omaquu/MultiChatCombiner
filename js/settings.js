@@ -245,10 +245,53 @@ function generateUrl() {
     numberfields.forEach(nf => params.set(nf.name, nf.value));
 
     var finalChatRDURL = baseUrl + '?' + params.toString() + `&streamerBotServerAddress=${streamerBotServerAddress}&streamerBotServerPort=${streamerBotServerPort}`;
-    outputField.value = finalChatRDURL
+    outputField.value = finalChatRDURL;
+
     const iframe = document.querySelector('#preview iframe');
-    if (iframe) { iframe.src = finalChatRDURL; }
+    if (iframe) {
+        const currentSrc = iframe.src;
+        const currentBase = currentSrc.split('?')[0];
+        const newBase = finalChatRDURL.split('?')[0];
+
+        // Only reload if base URL changed or it's empty
+        if (currentSrc === "" || currentSrc === "about:blank" || currentBase !== newBase) {
+            iframe.src = finalChatRDURL;
+            iframe.onload = () => {
+                // Send initial settings after load just in case (optional, but good for sync)
+                iframe.contentWindow.postMessage({
+                    type: 'updateSettings',
+                    settings: Object.fromEntries(params)
+                }, '*');
+            };
+        } else {
+            // Send settings update to iframe without reload
+            const settingsObj = {};
+            params.forEach((value, key) => { settingsObj[key] = value; });
+
+            iframe.contentWindow.postMessage({
+                type: 'updateSettings',
+                settings: settingsObj
+            }, '*');
+        }
+    }
 }
+
+// Add Test Message Listener
+document.addEventListener('DOMContentLoaded', () => {
+    const testBtn = document.getElementById('sendTestMessageBtn');
+    if (testBtn) {
+        testBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const iframe = document.querySelector('#preview iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({
+                    type: 'testMessage',
+                    text: "This is a test message to preview your visual settings! 😎"
+                }, '*');
+            }
+        });
+    }
+});
 
 
 /* -------------------------

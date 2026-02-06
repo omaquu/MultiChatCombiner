@@ -45,6 +45,14 @@ const chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
 const chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
 const chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
 
+// Text Effects Params
+let chatMessageStrokeColor = getURLParam("chatMessageStrokeColor", "#000000");
+let chatMessageStrokeWidth = getURLParam("chatMessageStrokeWidth", 0);
+let chatMessageShadowColor = getURLParam("chatMessageShadowColor", "#000000");
+let chatMessageShadowBlur = getURLParam("chatMessageShadowBlur", 0);
+let chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
+let chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
+
 const chatContainer = document.querySelector('#chat');
 const chatTemplate = document.querySelector('#chat-message');
 const eventTemplate = document.querySelector('#event-message');
@@ -116,6 +124,16 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     root.id = messageid;
     root.id = messageid;
     root.style.opacity = '0';
+
+    // Apply Text Effects (Independent of Bubbles)
+    root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
+    root.style.setProperty('--text-stroke-width', `${chatMessageStrokeWidth}px`);
+    root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
+    root.style.setProperty('--text-shadow-blur', `${chatMessageShadowBlur}px`);
+    // Shadow is slightly offset, Glow is centered (0 offset)
+    root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
+    root.style.setProperty('--text-glow-color', chatMessageGlowColor);
+    root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
 
     if (chatBubbles) {
         root.classList.add('chat-bubble');
@@ -813,6 +831,13 @@ chatInputForm.addEventListener("submit", function (event) {
         }
     ).then((sendchatstuff) => {
         console.debug('[ChatRD] Sending Chat to Streamer.Bot', sendchatstuff);
+    }).catch(err => {
+        console.error('[ChatRD] Failed to send chat:', err);
+        pushNotify({
+            title: 'Send Failed',
+            text: 'Could not send message. Is Streamer.bot connected?',
+            status: 'error'
+        });
     });
 
     // Sends Message to TikTok that are not commands
@@ -825,7 +850,7 @@ chatInputForm.addEventListener("submit", function (event) {
                 }
             ).then((sendchatstuff) => {
                 console.debug('[ChatRD] Sending TikTok Chat to Streamer.Bot', sendchatstuff);
-            });
+            }).catch(err => console.error('[ChatRD] Failed to send TikTok chat:', err));
         }
     }
 
@@ -1077,3 +1102,73 @@ async function multiStreamChat(element) {
 function isImageUrl(url) {
     return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i).test(url);
 }
+
+/* Listen for Live Updates */
+window.addEventListener('message', (event) => {
+    if (event.data.type === 'updateSettings') {
+        const s = event.data.settings;
+
+        // Update variables
+        if (s.chatBubbles !== undefined) chatBubbles = (s.chatBubbles === 'true' || s.chatBubbles === true);
+        if (s.embedImages !== undefined) embedImages = (s.embedImages === 'true' || s.embedImages === true);
+        if (s.embedYouTube !== undefined) embedYouTube = (s.embedYouTube === 'true' || s.embedYouTube === true);
+        if (s.chatBubbleAnimation !== undefined) chatBubbleAnimation = s.chatBubbleAnimation;
+        if (s.chatBubbleGlass !== undefined) chatBubbleGlass = s.chatBubbleGlass;
+        if (s.chatBubbleBorderColor !== undefined) chatBubbleBorderColor = s.chatBubbleBorderColor;
+        if (s.chatBubbleBorderWidth !== undefined) chatBubbleBorderWidth = s.chatBubbleBorderWidth;
+        if (s.chatBubbleShadowColor !== undefined) chatBubbleShadowColor = s.chatBubbleShadowColor;
+        if (s.chatBubbleShadowBlur !== undefined) chatBubbleShadowBlur = s.chatBubbleShadowBlur;
+        if (s.chatBubbleGlowColor !== undefined) chatBubbleGlowColor = s.chatBubbleGlowColor;
+        if (s.chatBubbleGlowSpread !== undefined) chatBubbleGlowSpread = s.chatBubbleGlowSpread;
+
+        if (s.chatMessageStrokeColor !== undefined) chatMessageStrokeColor = s.chatMessageStrokeColor;
+        if (s.chatMessageStrokeWidth !== undefined) chatMessageStrokeWidth = Number(s.chatMessageStrokeWidth) || 0;
+        if (s.chatMessageShadowColor !== undefined) chatMessageShadowColor = s.chatMessageShadowColor;
+        if (s.chatMessageShadowBlur !== undefined) chatMessageShadowBlur = Number(s.chatMessageShadowBlur) || 0;
+        if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
+        if (s.chatMessageGlowSpread !== undefined) chatMessageGlowSpread = Number(s.chatMessageGlowSpread) || 0;
+
+        // Force update existing messages
+        document.querySelectorAll('.item').forEach(root => {
+            // Re-apply bubble class
+            if (chatBubbles) root.classList.add('chat-bubble');
+            else root.classList.remove('chat-bubble');
+
+            // Update Styles
+            root.style.setProperty('--bubble-glass', `${Number(chatBubbleGlass) || 0}px`);
+            root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
+            root.style.setProperty('--bubble-border-width', `${Number(chatBubbleBorderWidth) || 0}px`);
+            root.style.setProperty('--bubble-shadow-color', chatBubbleShadowColor);
+            root.style.setProperty('--bubble-shadow-blur', `${Number(chatBubbleShadowBlur) || 0}px`);
+            root.style.setProperty('--bubble-shadow-offset', `${(Number(chatBubbleShadowBlur) || 0) / 2}px`);
+            root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
+            root.style.setProperty('--bubble-glow-blur', `${Number(chatBubbleGlowSpread) || 0}px`);
+
+            // Update Text Styles (Independent of Bubbles)
+            root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
+            root.style.setProperty('--text-stroke-width', `${Number(chatMessageStrokeWidth) || 0}px`);
+            root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
+            root.style.setProperty('--text-shadow-blur', `${Number(chatMessageShadowBlur) || 0}px`);
+            root.style.setProperty('--text-shadow-offset', `${(Number(chatMessageShadowBlur) || 0) > 0 ? 2 : 0}px`);
+            root.style.setProperty('--text-glow-color', chatMessageGlowColor);
+            root.style.setProperty('--text-glow-spread', `${Number(chatMessageGlowSpread) || 0}px`);
+
+            // Update Animation
+            root.className = root.className.replace(/anim-\w+/g, "").trim(); // Remove old anim
+            if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
+                root.classList.add(`anim-${chatBubbleAnimation}`);
+            }
+        });
+    } else if (event.data.type === 'testMessage') {
+        const testClone = chatTemplate.content.cloneNode(true);
+        addMessageItem('twitch', testClone, [], 'testuser', 'test-' + Date.now());
+        const root = document.getElementById('test-' + Date.now()) || document.querySelector('.item:last-child');
+
+        if (root) {
+            root.querySelector('.user').textContent = "TestUser";
+            root.querySelector('.actual-message').textContent = event.data.text || "This is a test message to preview your visual settings! 😎";
+            root.querySelector('.platform').innerHTML = '<img src="js/modules/twitch/images/logo-twitch.svg">';
+            root.style.opacity = 1;
+        }
+    }
+});

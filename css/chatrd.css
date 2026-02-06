@@ -86,7 +86,7 @@ body {
     display: flex;
     flex-direction: column-reverse;
     overflow-y: auto;
-    padding: 10px 10px 30px 10px;
+    padding: 0px 10px;
     scrollbar-color: #555 #1e1e1e;
 }
 
@@ -234,6 +234,15 @@ body {
 #chat .item .actual-message {
     /*margin-top: 3px;*/
     font-weight: 300;
+
+    /* Text Stroke */
+    -webkit-text-stroke-color: var(--text-stroke-color, transparent);
+    -webkit-text-stroke-width: var(--text-stroke-width, 0px);
+
+    /* Text Shadow & Glow */
+    text-shadow:
+        var(--text-shadow-offset, 2px) var(--text-shadow-offset, 2px) var(--text-shadow-blur, 0px) var(--text-shadow-color, transparent),
+        0 0 var(--text-glow-spread, 0px) var(--text-glow-color, transparent);
 }
 
 #chat .item .actual-message img {

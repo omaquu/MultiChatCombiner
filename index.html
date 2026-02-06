@@ -395,6 +395,52 @@
                             <hr>
 
                             <div class="config">
+                                <label style="text-align: left; width: 100%;"><strong>Text Effects (No
+                                        Bubbles)</strong></label>
+                            </div>
+
+                            <div class="config">
+                                <label>Text Stroke<br><small>Color</small></label>
+                                <input type="color" name="chatMessageStrokeColor" value="#000000">
+                            </div>
+                            <div class="config">
+                                <label>Stroke Width<br><small>Width (0 for off).</small></label>
+                                <input type="range" name="chatMessageStrokeWidth" min="0" max="5" step="0.5" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Text Shadow<br><small>Color</small></label>
+                                <input type="color" name="chatMessageShadowColor" value="#000000">
+                            </div>
+                            <div class="config">
+                                <label>Shadow Blur<br><small>Strength (0 for off).</small></label>
+                                <input type="range" name="chatMessageShadowBlur" min="0" max="10" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Text Glow<br><small>Color</small></label>
+                                <input type="color" name="chatMessageGlowColor" value="#ffffff">
+                            </div>
+                            <div class="config">
+                                <label>Glow Spread<br><small>Strength (0 for off).</small></label>
+                                <input type="range" name="chatMessageGlowSpread" min="0" max="10" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <hr>
+
+                            <div class="config" style="justify-content: center;">
+                                <button id="sendTestMessageBtn"
+                                    style="padding: 10px 20px; background: #a970ff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                                    <i class="fa-solid fa-paper-plane"></i> Send Test Message
+                                </button>
+                            </div>
+
+                            <hr>
+
+                            <div class="config">
                                 <label>Multi-Streamer Mode<br>
                                     <small>Changes <strong>Twitch</strong> to <em class="msm-platform purple">Purple
                                             Platform</em>, <strong>YouTube</strong> to <em class="msm-platform red">Red
