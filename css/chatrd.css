@@ -235,14 +235,17 @@ body {
     /*margin-top: 3px;*/
     font-weight: 300;
 
-    /* Text Stroke */
-    -webkit-text-stroke-color: var(--text-stroke-color, transparent);
-    -webkit-text-stroke-width: var(--text-stroke-width, 0px);
-    paint-order: stroke fill;
-
-    /* Text Shadow & Glow */
+    /* Text Outline (Simulated via Shadow) */
     text-shadow:
+        calc(-1 * var(--text-stroke-width, 0px)) calc(-1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
+        calc(1 * var(--text-stroke-width, 0px)) calc(-1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
+        calc(-1 * var(--text-stroke-width, 0px)) calc(1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
+        calc(1 * var(--text-stroke-width, 0px)) calc(1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
+
+        /* Standard Shadow */
         var(--text-shadow-offset, 2px) var(--text-shadow-offset, 2px) var(--text-shadow-blur, 0px) var(--text-shadow-color, transparent),
+
+        /* Glow */
         0 0 var(--text-glow-spread, 0px) var(--text-glow-color, transparent);
 }
 
