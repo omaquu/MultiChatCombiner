@@ -206,6 +206,9 @@ function importSettings(input) {
 /* -------------------------
    Gerar URL de preview
 -------------------------- */
+/* -------------------------
+   Gerar URL de preview
+-------------------------- */
 function generateUrl() {
     const streamerBotServerAddress = document.querySelector('input[type=text][name=streamerBotServerAddress]').value;
     const streamerBotServerPort = document.querySelector('input[type=text][name=streamerBotServerPort]').value;
@@ -236,19 +239,66 @@ function generateUrl() {
     const ranges = document.querySelectorAll("input[type=range]:not(.avoid)");
 
     const params = new URLSearchParams();
+    const settingsObj = {};
 
-    selects.forEach(s => params.set(s.name, s.value));
-    ranges.forEach(r => params.set(r.name, r.value));
-    checkboxes.forEach(cb => params.set(cb.name, cb.checked));
-    colorfields.forEach(cf => params.set(cf.name, cf.value));
-    textfields.forEach(tf => params.set(tf.name, tf.value));
-    numberfields.forEach(nf => params.set(nf.name, nf.value));
+    selects.forEach(s => { params.set(s.name, s.value); settingsObj[s.name] = s.value; });
+    ranges.forEach(r => { params.set(r.name, r.value); settingsObj[r.name] = r.value; });
+    checkboxes.forEach(cb => { params.set(cb.name, cb.checked); settingsObj[cb.name] = cb.checked; });
+    colorfields.forEach(cf => { params.set(cf.name, cf.value); settingsObj[cf.name] = cf.value; });
+    textfields.forEach(tf => { params.set(tf.name, tf.value); settingsObj[tf.name] = tf.value; });
+    numberfields.forEach(nf => { params.set(nf.name, nf.value); settingsObj[nf.name] = nf.value; });
 
     var finalChatRDURL = baseUrl + '?' + params.toString() + `&streamerBotServerAddress=${streamerBotServerAddress}&streamerBotServerPort=${streamerBotServerPort}`;
     outputField.value = finalChatRDURL
+
     const iframe = document.querySelector('#preview iframe');
-    if (iframe) { iframe.src = finalChatRDURL; }
+    if (iframe) {
+        // Logic to prevent reload if only params changed
+        const currentSrc = iframe.src;
+        // Check if the base path is the same (ignoring params)
+        const currentBase = currentSrc.split('?')[0];
+        const newBase = finalChatRDURL.split('?')[0];
+
+        if (currentSrc === "" || currentSrc === "about:blank" || currentBase !== newBase) {
+            iframe.src = finalChatRDURL;
+        } else {
+            // Send settings update to iframe
+            iframe.contentWindow.postMessage({
+                type: 'updateSettings',
+                settings: settingsObj
+            }, '*');
+
+            // Update the URL silently without reloading? 
+            // Actually, we don't need to update the src attribute if we are postMessaging.
+            // But if the user reloads the page, they expect the new params.
+            // We can use history.replaceState inside the iframe, but we can't access it easily cross-origin (though here same origin).
+            // For now, just postMessage is enough for "Live" feel. 
+            // We can update the src attribute *after* postMessage? No, that triggers reload.
+            // We just leave it. The "Output URL" field has the correct link for OBS.
+        }
+    }
 }
+
+function sendTestMessage() {
+    const iframe = document.querySelector('#preview iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+            type: 'testMessage'
+        }, '*');
+    }
+}
+
+// Attach event listener only once
+document.addEventListener('DOMContentLoaded', () => {
+    // ... existing initialization ...
+    const testBtn = document.getElementById('sendTestMessageBtn');
+    if (testBtn) {
+        testBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sendTestMessage();
+        });
+    }
+});
 
 
 /* -------------------------
