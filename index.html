@@ -333,10 +333,100 @@
                                         class="slider"></span></label>
                             </div>
 
+
                             <div class="config">
-                                <label>Bubble Animation<br><small>Adds animation to chat bubbles.</small></label>
-                                <label class="switch"><input type="checkbox" name="chatBubbleAnimation"><span
+                                <label>Embed YouTube<br><small>Embeds YouTube videos from links.</small></label>
+                                <label class="switch"><input type="checkbox" name="embedYouTube"><span
                                         class="slider"></span></label>
+                            </div>
+
+                            <div class="config">
+                                <label>Bubble Animation<br><small>Select animation style.</small></label>
+                                <select name="chatBubbleAnimation">
+                                    <option value="none">None</option>
+                                    <option value="pop">Pop In</option>
+                                    <option value="slideLeft">Slide Left</option>
+                                    <option value="slideRight">Slide Right</option>
+                                    <option value="fade">Fade In</option>
+                                    <option value="bounce">Bounce In</option>
+                                    <option value="jelly">Jelly (Watery)</option>
+                                </select>
+                            </div>
+
+                            <div class="config">
+                                <label style="text-align: left; width: 100%;"><strong>Visual Effects
+                                        (Bubble)</strong></label>
+                            </div>
+
+                            <div class="config">
+                                <label>Glass Effect<br><small>Blur strength (0 for off).</small></label>
+                                <input type="range" name="chatBubbleGlass" min="0" max="20" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Border Stroke<br><small>Color</small></label>
+                                <input type="color" name="chatBubbleBorderColor" value="#ffffff">
+                            </div>
+                            <div class="config">
+                                <label>Border Width<br><small>Width (0 for off).</small></label>
+                                <input type="range" name="chatBubbleBorderWidth" min="0" max="10" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Drop Shadow<br><small>Color</small></label>
+                                <input type="color" name="chatBubbleShadowColor" value="#000000">
+                            </div>
+                            <div class="config">
+                                <label>Shadow Blur<br><small>Strength (0 for off).</small></label>
+                                <input type="range" name="chatBubbleShadowBlur" min="0" max="20" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Glow Effect<br><small>Color</small></label>
+                                <input type="color" name="chatBubbleGlowColor" value="#ffffff">
+                            </div>
+                            <div class="config">
+                                <label>Glow Spread<br><small>Strength (0 for off).</small></label>
+                                <input type="range" name="chatBubbleGlowSpread" min="0" max="20" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label style="text-align: left; width: 100%;"><strong>Visual Effects
+                                        (Text)</strong></label>
+                            </div>
+
+                            <div class="config">
+                                <label>Text Stroke<br><small>Color</small></label>
+                                <input type="color" name="chatMessageStrokeColor" value="#000000">
+                            </div>
+                            <div class="config">
+                                <label>Stroke Width<br><small>Width (0 for off).</small></label>
+                                <input type="range" name="chatMessageStrokeWidth" min="0" max="5" step="0.5" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Text Shadow<br><small>Color</small></label>
+                                <input type="color" name="chatMessageShadowColor" value="#000000">
+                            </div>
+                            <div class="config">
+                                <label>Shadow Blur<br><small>Strength (0 for off).</small></label>
+                                <input type="range" name="chatMessageShadowBlur" min="0" max="10" step="1" value="0"
+                                    style="width: 100px;">
+                            </div>
+
+                            <div class="config">
+                                <label>Text Glow<br><small>Color</small></label>
+                                <input type="color" name="chatMessageGlowColor" value="#ffffff">
+                            </div>
+                            <div class="config">
+                                <label>Glow Spread<br><small>Strength (0 for off).</small></label>
+                                <input type="range" name="chatMessageGlowSpread" min="0" max="10" step="1" value="0"
+                                    style="width: 100px;">
                             </div>
 
                             <hr>
@@ -377,6 +467,20 @@
                                             href="https://github.com/vortisrd/chatrd#-commands-supported-by-the-chat-field">Commands
                                             Supported</a>.</strong>
                                 </small>
+                            </div>
+
+                            <hr>
+
+                            <div class="config">
+                                <label>Settings Manager<br><small>Save or load your configuration.</small></label>
+                                <div style="display: flex; gap: 5px;">
+                                    <button onclick="exportSettings()"
+                                        style="flex: 1; padding: 5px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">Export</button>
+                                    <button onclick="document.getElementById('importSettingsInput').click()"
+                                        style="flex: 1; padding: 5px; background: #333; color: white; border: none; border-radius: 5px; cursor: pointer;">Import</button>
+                                    <input type="file" id="importSettingsInput" style="display: none;" accept=".json"
+                                        onchange="importSettings(this)">
+                                </div>
                             </div>
 
                         </div>

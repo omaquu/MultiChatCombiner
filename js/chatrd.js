@@ -32,8 +32,26 @@ const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLower
 
 const hideAfter = getURLParam("hideAfter", 0);
 const embedImages = getURLParam("embedImages", false);
+const embedYouTube = getURLParam("embedYouTube", false);
 const chatBubbles = getURLParam("chatBubbles", false);
-const chatBubbleAnimation = getURLParam("chatBubbleAnimation", false);
+const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
+
+// Advanced Visuals Params
+const chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
+const chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
+const chatBubbleBorderWidth = getURLParam("chatBubbleBorderWidth", 0);
+const chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
+const chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
+const chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
+const chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
+
+// Text Styling Params
+const chatMessageStrokeColor = getURLParam("chatMessageStrokeColor", "#000000");
+const chatMessageStrokeWidth = getURLParam("chatMessageStrokeWidth", 0);
+const chatMessageShadowColor = getURLParam("chatMessageShadowColor", "#000000");
+const chatMessageShadowBlur = getURLParam("chatMessageShadowBlur", 0);
+const chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
+const chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
 
 const chatContainer = document.querySelector('#chat');
 const chatTemplate = document.querySelector('#chat-message');
@@ -109,9 +127,32 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
 
     if (chatBubbles) {
         root.classList.add('chat-bubble');
-        if (chatBubbleAnimation) {
-            root.classList.add('chat-bubble-animated');
+
+        // Apply Animation Class
+        if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
+            root.classList.add(`anim-${chatBubbleAnimation}`);
         }
+
+        // Apply Dynamic Styles via CSS Variables (Bubble)
+        root.style.setProperty('--bubble-glass', `${chatBubbleGlass}px`);
+        root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
+        root.style.setProperty('--bubble-border-width', `${chatBubbleBorderWidth}px`);
+        root.style.setProperty('--bubble-shadow-color', chatBubbleShadowColor);
+        root.style.setProperty('--bubble-shadow-blur', `${chatBubbleShadowBlur}px`);
+        // Calculate offset based on blur to give depth
+        root.style.setProperty('--bubble-shadow-offset', `${chatBubbleShadowBlur / 2}px`);
+        root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
+        root.style.setProperty('--bubble-glow-blur', `${chatBubbleGlowSpread}px`);
+
+        // Apply Dynamic Styles via CSS Variables (Text)
+        root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
+        root.style.setProperty('--text-stroke-width', `${chatMessageStrokeWidth}px`);
+        root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
+        root.style.setProperty('--text-shadow-blur', `${chatMessageShadowBlur}px`);
+        // Shadow is slightly offset, Glow is centered (0 offset)
+        root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
+        root.style.setProperty('--text-glow-color', chatMessageGlowColor);
+        root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
     }
 
     const messageEl = clone.querySelector('.actual-message');
@@ -119,10 +160,10 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
 
     getAndReplaceLinks(messageEl).then(() => {
         multiStreamChat(messageEl);
+        const messageContent = messageEl.innerText.trim();
 
         /* Embed Images */
         if (embedImages) {
-            const messageContent = messageEl.innerText.trim();
             if (isImageUrl(messageContent)) {
                 const image = new Image();
                 image.onload = function () {
@@ -132,11 +173,36 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
                     messageEl.innerHTML = '';
                     messageEl.appendChild(image);
                 };
-
-                // Use DuckDuckGo proxy to avoid CORS and mixed content issues
                 image.src = "https://external-content.duckduckgo.com/iu/?u=" + messageContent;
             }
         }
+
+        /* Embed YouTube */
+        if (embedYouTube) {
+            const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+            const match = messageContent.match(ytRegex);
+            if (match && match[1]) {
+                const videoId = match[1];
+                const iframe = document.createElement('iframe');
+                iframe.width = "100%";
+                iframe.height = "250"; // Adjust height as needed
+                iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                iframe.frameBorder = "0";
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                iframe.allowFullscreen = true;
+                iframe.style.borderRadius = "10px";
+                iframe.style.marginTop = "10px";
+
+                // If the message is JUST the link, clear it. Else append.
+                if (messageContent === match[0] || messageContent === match.input) {
+                    messageEl.innerHTML = '';
+                } else {
+                    messageEl.appendChild(document.createElement('br'));
+                }
+                messageEl.appendChild(iframe);
+            }
+        }
+
     });
 
     const platformElement = clone.querySelector('.platform');
