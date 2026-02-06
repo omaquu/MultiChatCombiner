@@ -2,52 +2,48 @@
 /*         OPTIONS         */
 /* ----------------------- */
 
-let showPlatform = getURLParam("showPlatform", true);
-let showPlatformDot = getURLParam("showPlatformDot", false);
-let showAvatar = getURLParam("showAvatar", true);
-let showTimestamps = getURLParam("showTimestamps", true);
-let ampmTimeStamps = getURLParam("ampmTimeStamps", false);
-let showBadges = getURLParam("showBadges", true);
-let showPlatformStatistics = getURLParam("showPlatformStatistics", true);
+const showPlatform = getURLParam("showPlatform", true);
+const showPlatformDot = getURLParam("showPlatformDot", false);
+const showAvatar = getURLParam("showAvatar", true);
+const showTimestamps = getURLParam("showTimestamps", true);
+const ampmTimeStamps = getURLParam("ampmTimeStamps", false);
+const showBadges = getURLParam("showBadges", true);
+const showPlatformStatistics = getURLParam("showPlatformStatistics", true);
 
-let chatThreshold = 50;
-let chatOneLine = getURLParam("chatOneLine", false);
-let chatHorizontal = getURLParam("chatHorizontal", false);
-let chatFontSize = getURLParam("chatFontSize", "14px");
-let chatFontFamily = getURLParam("chatFontFamily", "Poppins");
-let chatBackground = getURLParam("chatBackground", "#18181b");
-let chatBackgroundOpacity = getURLParam("chatBackgroundOpacity", 0);
-let chatScrollBar = getURLParam("chatScrollBar", false);
-let chatField = getURLParam("chatField", false);
-let chatrdSkin = getURLParam("chatrdSkin", "default");
+const chatThreshold = 50;
+const chatOneLine = getURLParam("chatOneLine", false);
+const chatHorizontal = getURLParam("chatHorizontal", false);
+const chatMessageGroup = getURLParam("chatMessageGroup", false);
+const chatFontSize = getURLParam("chatFontSize", 1);
+const chatFontFamily = getURLParam("chatFontFamily", "DM Sans");
+const chatBackground = getURLParam("chatBackground", "#121212");
+const chatBackgroundOpacity = getURLParam("chatBackgroundOpacity", 1);
+const chatScrollBar = getURLParam("chatScrollBar", false);
+const chatField = getURLParam("chatField", false);
+const chatModeration = getURLParam("chatModeration", false);
 
-let hideAfter = getURLParam("hideAfter", 0);
-let embedImages = getURLParam("embedImages", false);
-let embedYouTube = getURLParam("embedYouTube", false);
-let chatBubbles = getURLParam("chatBubbles", false);
-let chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
+const chatrdSkin = getURLParam("chatrdSkin", "default");
+
+const multiStreamerMode = getURLParam("multiStreamerMode", false);
+
+const excludeCommands = getURLParam("excludeCommands", true);
+const ignoreChatters = getURLParam("ignoreChatters", "");
+const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLowerCase()) || [];
+
+const hideAfter = getURLParam("hideAfter", 0);
+const embedImages = getURLParam("embedImages", false);
+const embedYouTube = getURLParam("embedYouTube", false);
+const chatBubbles = getURLParam("chatBubbles", false);
+const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
 
 // Advanced Visuals Params
-let chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
-let chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
-let chatBubbleBorderWidth = getURLParam("chatBubbleBorderWidth", 0);
-let chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
-let chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
-let chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
-let chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
-
-// Text Styling Params
-let chatMessageStrokeColor = getURLParam("chatMessageStrokeColor", "#000000");
-let chatMessageStrokeWidth = getURLParam("chatMessageStrokeWidth", 0);
-let chatMessageShadowColor = getURLParam("chatMessageShadowColor", "#000000");
-let chatMessageShadowBlur = getURLParam("chatMessageShadowBlur", 0);
-let chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
-let chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
-
-// Global lists (required by modules)
-let ignoreUserList = [];
-let ignoreMessageList = [];
-
+const chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
+const chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
+const chatBubbleBorderWidth = getURLParam("chatBubbleBorderWidth", 0);
+const chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
+const chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
+const chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
+const chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
 
 const chatContainer = document.querySelector('#chat');
 const chatTemplate = document.querySelector('#chat-message');
@@ -89,17 +85,8 @@ chatContainer.style.zoom = chatFontSize;
 
 if (chatField) {
     const chatfieldelement = document.getElementById("chat-input");
-    if (chatfieldelement) chatfieldelement.classList.add('enabled');
+    chatfieldelement.style.display = '';
 }
-
-// Ensure defaults are number 0 if invalid
-if (isNaN(chatBubbleGlass)) chatBubbleGlass = 0;
-if (isNaN(chatBubbleBorderWidth)) chatBubbleBorderWidth = 0;
-if (isNaN(chatBubbleShadowBlur)) chatBubbleShadowBlur = 0;
-if (isNaN(chatBubbleGlowSpread)) chatBubbleGlowSpread = 0;
-if (isNaN(chatMessageStrokeWidth)) chatMessageStrokeWidth = 0;
-if (isNaN(chatMessageShadowBlur)) chatMessageShadowBlur = 0;
-if (isNaN(chatMessageGlowSpread)) chatMessageGlowSpread = 0;
 
 
 function addMessageItem(platform, clone, classes, userid, messageid) {
@@ -133,7 +120,12 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     if (chatBubbles) {
         root.classList.add('chat-bubble');
 
-        // Apply Dynamic Styles via CSS Variables (Bubble)
+        // Apply Animation Class
+        if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
+            root.classList.add(`anim-${chatBubbleAnimation}`);
+        }
+
+        // Apply Dynamic Styles via CSS Variables
         root.style.setProperty('--bubble-glass', `${chatBubbleGlass}px`);
         root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
         root.style.setProperty('--bubble-border-width', `${chatBubbleBorderWidth}px`);
@@ -144,21 +136,6 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
         root.style.setProperty('--bubble-glow-blur', `${chatBubbleGlowSpread}px`);
     }
-
-    // Apply Animation Class (Independent of Bubbles)
-    if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
-        root.classList.add(`anim-${chatBubbleAnimation}`);
-    }
-
-    // Apply Dynamic Styles via CSS Variables (Text - Independent of Bubbles)
-    root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
-    root.style.setProperty('--text-stroke-width', `${chatMessageStrokeWidth}px`);
-    root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
-    root.style.setProperty('--text-shadow-blur', `${chatMessageShadowBlur}px`);
-    // Shadow is slightly offset, Glow is centered (0 offset)
-    root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
-    root.style.setProperty('--text-glow-color', chatMessageGlowColor);
-    root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
 
     const messageEl = clone.querySelector('.actual-message');
     const infoEl = clone.querySelector('.info');
@@ -1100,72 +1077,3 @@ async function multiStreamChat(element) {
 function isImageUrl(url) {
     return (/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i).test(url);
 }
-
-/* Listen for Live Updates */
-window.addEventListener('message', (event) => {
-    if (event.data.type === 'updateSettings') {
-        const s = event.data.settings;
-
-        // Update variables
-        if (s.chatBubbles !== undefined) chatBubbles = (s.chatBubbles === 'true' || s.chatBubbles === true);
-        if (s.embedImages !== undefined) embedImages = (s.embedImages === 'true' || s.embedImages === true);
-        if (s.embedYouTube !== undefined) embedYouTube = (s.embedYouTube === 'true' || s.embedYouTube === true);
-        if (s.chatBubbleAnimation !== undefined) chatBubbleAnimation = s.chatBubbleAnimation;
-        if (s.chatBubbleGlass !== undefined) chatBubbleGlass = s.chatBubbleGlass;
-        if (s.chatBubbleBorderColor !== undefined) chatBubbleBorderColor = s.chatBubbleBorderColor;
-        if (s.chatBubbleBorderWidth !== undefined) chatBubbleBorderWidth = s.chatBubbleBorderWidth;
-        if (s.chatBubbleShadowColor !== undefined) chatBubbleShadowColor = s.chatBubbleShadowColor;
-        if (s.chatBubbleShadowBlur !== undefined) chatBubbleShadowBlur = s.chatBubbleShadowBlur;
-        if (s.chatBubbleGlowColor !== undefined) chatBubbleGlowColor = s.chatBubbleGlowColor;
-        if (s.chatBubbleGlowSpread !== undefined) chatBubbleGlowSpread = s.chatBubbleGlowSpread;
-
-        if (s.chatMessageStrokeColor !== undefined) chatMessageStrokeColor = s.chatMessageStrokeColor;
-        if (s.chatMessageStrokeWidth !== undefined) chatMessageStrokeWidth = Number(s.chatMessageStrokeWidth) || 0;
-        if (s.chatMessageShadowColor !== undefined) chatMessageShadowColor = s.chatMessageShadowColor;
-        if (s.chatMessageShadowBlur !== undefined) chatMessageShadowBlur = Number(s.chatMessageShadowBlur) || 0;
-        if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
-        if (s.chatMessageGlowSpread !== undefined) chatMessageGlowSpread = Number(s.chatMessageGlowSpread) || 0;
-
-        // Force update existing messages
-        document.querySelectorAll('.item').forEach(root => {
-            // Re-apply bubble class
-            if (chatBubbles) root.classList.add('chat-bubble');
-            else root.classList.remove('chat-bubble');
-
-            // Update Styles
-            root.style.setProperty('--bubble-glass', `${Number(chatBubbleGlass) || 0}px`);
-            root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
-            root.style.setProperty('--bubble-border-width', `${Number(chatBubbleBorderWidth) || 0}px`);
-            root.style.setProperty('--bubble-shadow-color', chatBubbleShadowColor);
-            root.style.setProperty('--bubble-shadow-blur', `${Number(chatBubbleShadowBlur) || 0}px`);
-            root.style.setProperty('--bubble-shadow-offset', `${(Number(chatBubbleShadowBlur) || 0) / 2}px`);
-            root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
-            root.style.setProperty('--bubble-glow-blur', `${Number(chatBubbleGlowSpread) || 0}px`);
-
-            root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
-            root.style.setProperty('--text-stroke-width', `${Number(chatMessageStrokeWidth) || 0}px`);
-            root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
-            root.style.setProperty('--text-shadow-blur', `${Number(chatMessageShadowBlur) || 0}px`);
-            root.style.setProperty('--text-shadow-offset', `${(Number(chatMessageShadowBlur) || 0) > 0 ? 2 : 0}px`);
-            root.style.setProperty('--text-glow-color', chatMessageGlowColor);
-            root.style.setProperty('--text-glow-spread', `${Number(chatMessageGlowSpread) || 0}px`);
-
-            // Update Animation
-            root.className = root.className.replace(/anim-\w+/g, "").trim(); // Remove old anim
-            if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
-                root.classList.add(`anim-${chatBubbleAnimation}`);
-            }
-        });
-    } else if (event.data.type === 'testMessage') {
-        const testClone = chatTemplate.content.cloneNode(true);
-        addMessageItem('twitch', testClone, [], 'testuser', 'test-' + Date.now());
-        const root = document.getElementById('test-' + Date.now()) || document.querySelector('.item:last-child');
-
-        if (root) {
-            root.querySelector('.user').textContent = "TestUser";
-            root.querySelector('.actual-message').textContent = "This is a test message to preview your visual settings! 😎";
-            root.querySelector('.platform').innerHTML = '<i class="fa-brands fa-twitch"></i>';
-            root.style.opacity = 1;
-        }
-    }
-});
