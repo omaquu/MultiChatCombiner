@@ -128,11 +128,6 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     if (chatBubbles) {
         root.classList.add('chat-bubble');
 
-        // Apply Animation Class
-        if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
-            root.classList.add(`anim-${chatBubbleAnimation}`);
-        }
-
         // Apply Dynamic Styles via CSS Variables (Bubble)
         root.style.setProperty('--bubble-glass', `${chatBubbleGlass}px`);
         root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
@@ -143,17 +138,22 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         root.style.setProperty('--bubble-shadow-offset', `${chatBubbleShadowBlur / 2}px`);
         root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
         root.style.setProperty('--bubble-glow-blur', `${chatBubbleGlowSpread}px`);
-
-        // Apply Dynamic Styles via CSS Variables (Text)
-        root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
-        root.style.setProperty('--text-stroke-width', `${chatMessageStrokeWidth}px`);
-        root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
-        root.style.setProperty('--text-shadow-blur', `${chatMessageShadowBlur}px`);
-        // Shadow is slightly offset, Glow is centered (0 offset)
-        root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
-        root.style.setProperty('--text-glow-color', chatMessageGlowColor);
-        root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
     }
+
+    // Apply Animation Class (Independent of Bubbles)
+    if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
+        root.classList.add(`anim-${chatBubbleAnimation}`);
+    }
+
+    // Apply Dynamic Styles via CSS Variables (Text - Independent of Bubbles)
+    root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
+    root.style.setProperty('--text-stroke-width', `${chatMessageStrokeWidth}px`);
+    root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
+    root.style.setProperty('--text-shadow-blur', `${chatMessageShadowBlur}px`);
+    // Shadow is slightly offset, Glow is centered (0 offset)
+    root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
+    root.style.setProperty('--text-glow-color', chatMessageGlowColor);
+    root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
 
     const messageEl = clone.querySelector('.actual-message');
     const infoEl = clone.querySelector('.info');
