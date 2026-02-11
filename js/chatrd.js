@@ -33,6 +33,7 @@ const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLower
 const hideAfter = getURLParam("hideAfter", 0);
 const embedImages = getURLParam("embedImages", false);
 const embedYouTube = getURLParam("embedYouTube", false);
+const embedYouTube = getURLParam("embedYouTube", false);
 const chatBubbles = getURLParam("chatBubbles", false);
 const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
 
@@ -1103,6 +1104,31 @@ async function getAndReplaceLinks(el) {
 document.addEventListener("DOMContentLoaded", function () {
     pushChatInputSettings();
     loadChatInputSettingFromLocalStorage();
+
+    // Test Message Button
+    const testBtn = document.getElementById('sendTestMessageBtn');
+    if (testBtn) {
+        testBtn.addEventListener('click', () => {
+            const platforms = ['twitch', 'youtube', 'kick', 'tiktok'];
+            const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+            const randomUser = "TestUser_" + Math.floor(Math.random() * 1000);
+
+            // Mock a message item
+            const clone = chatTemplate.content.cloneNode(true);
+            const classes = [randomPlatform, 'item', 'chat'];
+
+            // Populate Clone
+            clone.querySelector('.user').textContent = randomUser;
+            clone.querySelector('.actual-message').innerHTML = "This is a test message with effects! " + new Date().toLocaleTimeString();
+
+            // Random Badges?
+            const badges = clone.querySelector('.badges');
+            if (badges) badges.innerHTML = ''; // Clear for test
+
+            // Add
+            addMessageItem(randomPlatform, clone, classes, randomUser, "msg_" + Date.now());
+        });
+    }
 });
 
 
