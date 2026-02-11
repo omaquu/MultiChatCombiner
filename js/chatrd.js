@@ -32,8 +32,27 @@ const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLower
 
 const hideAfter = getURLParam("hideAfter", 0);
 const embedImages = getURLParam("embedImages", false);
+const embedYouTube = getURLParam("embedYouTube", false);
 const chatBubbles = getURLParam("chatBubbles", false);
-const chatBubbleAnimation = getURLParam("chatBubbleAnimation", false);
+const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
+
+// Advanced Visuals Params
+const chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
+const chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
+const chatBubbleBorderWidth = getURLParam("chatBubbleBorderWidth", 0);
+const chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
+const chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
+const chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
+const chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
+
+// Text Effects Params
+let chatMessageStrokeColor = getURLParam("chatMessageStrokeColor", "#000000");
+let chatMessageStrokeWidth = getURLParam("chatMessageStrokeWidth", 0);
+let chatMessageShadowColor = getURLParam("chatMessageShadowColor", "#000000");
+let chatMessageShadowBlur = getURLParam("chatMessageShadowBlur", 0);
+let chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
+let chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
+let chatMessageWatery = getURLParam("chatMessageWatery", false);
 
 // Chat Direction
 let chatDirection = getURLParam("chatDirection", "bottom"); // 'bottom' or 'top'
@@ -44,6 +63,8 @@ let embedPermsMod = getURLParam("embedPermsMod", true);
 let embedPermsVip = getURLParam("embedPermsVip", true);
 let embedPermsSub = getURLParam("embedPermsSub", false);
 let embedPermsEveryone = getURLParam("embedPermsEveryone", false);
+
+const chatContainer = document.querySelector('#chat');
 
 function checkEmbedPermission(badges) {
     if (embedPermsEveryone) return true;
@@ -57,23 +78,23 @@ function checkEmbedPermission(badges) {
         badges.forEach(b => {
             const name = (b.name || "").toLowerCase();
             const id = (b.id || "").toLowerCase(); // Check ID too just in case
-
             if (name === "broadcaster" || id === "broadcaster") isBroadcaster = true;
             if (name === "moderator" || id === "moderator") isMod = true;
             if (name === "vip" || id === "vip") isVip = true;
-            if (name === "subscriber" || id === "subscriber" || name === "founder" || id === "founder") isSub = true;
+            if (name === "subscriber" || id === "subscriber") isSub = true;
+            // YouTube/Kick might use different badge names
+            if (name === "owner") isBroadcaster = true;
         });
     }
 
-    if (embedPermsBroadcaster && isBroadcaster) return true;
-    if (embedPermsMod && isMod) return true;
-    if (embedPermsVip && isVip) return true;
-    if (embedPermsSub && isSub) return true;
+    if (isBroadcaster && embedPermsBroadcaster) return true;
+    if (isMod && embedPermsMod) return true;
+    if (isVip && embedPermsVip) return true;
+    if (isSub && embedPermsSub) return true;
 
     return false;
 }
 
-const chatContainer = document.querySelector('#chat');
 const chatTemplate = document.querySelector('#chat-message');
 const eventTemplate = document.querySelector('#event-message');
 
@@ -121,20 +142,20 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     removeExtraChatMessages();
 
     let chatmodtwitch = `<div class="chatmoderation">
-                <button onclick="executeModCommand(event, '/deletemessage ${messageid}')" title="Remove Message"><i class="fa-solid fa-trash-can"></i></button>
-                <button onclick="executeModCommand(event, '/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
-                <button onclick="executeModCommand(event, '/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
-            </div>`;
+            <button onclick="executeModCommand(event, '/deletemessage ${messageid}')" title="Remove Message"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="executeModCommand(event, '/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
+            <button onclick="executeModCommand(event, '/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
+        </div>`;
 
     let chatmodyoutube = `<div class="chatmoderation">
-                <button onclick="executeModCommand(event, '/yt/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
-                <button onclick="executeModCommand(event, '/yt/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
-            </div>`;
+            <button onclick="executeModCommand(event, '/yt/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
+            <button onclick="executeModCommand(event, '/yt/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
+        </div>`;
 
     let chatmodkick = `<div class="chatmoderation">
-                <button onclick="executeModCommand(event, '/kick/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
-                <button onclick="executeModCommand(event, '/kick/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
-            </div>`;
+            <button onclick="executeModCommand(event, '/kick/timeout ${userid}')" title="Timeout User"><i class="fa-solid fa-stopwatch"></i></button>
+            <button onclick="executeModCommand(event, '/kick/ban ${userid}')" title="Ban User"><i class="fa-solid fa-gavel"></i></button>
+        </div>`;
 
     if (showSpeakerbot == true && speakerBotChatRead == true) { speakerBotTTSRead(clone, 'chat'); }
 
@@ -145,15 +166,39 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     root.id = messageid;
     root.style.opacity = '0';
 
-    if (chatBubbles) {
-        root.classList.add('chat-bubble');
-        if (chatBubbleAnimation) {
-            root.classList.add('chat-bubble-animated');
-        }
+    // Apply Text Effects (Independent of Bubbles)
+    root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
+    root.style.setProperty('--text-stroke-width', `${chatMessageStrokeWidth}px`);
+    root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
+    root.style.setProperty('--text-shadow-blur', `${chatMessageShadowBlur}px`);
+    // Shadow is slightly offset, Glow is centered (0 offset)
+    root.style.setProperty('--text-shadow-offset', `${chatMessageShadowBlur > 0 ? 2 : 0}px`);
+    root.style.setProperty('--text-glow-color', chatMessageGlowColor);
+    root.style.setProperty('--text-glow-spread', `${chatMessageGlowSpread}px`);
+
+    if (chatMessageWatery) {
+        root.querySelector('.actual-message').classList.add('watery-text');
     }
 
-    const messageEl = clone.querySelector('.actual-message');
-    const infoEl = clone.querySelector('.info');
+    if (chatBubbles) {
+        root.classList.add('chat-bubble');
+
+        // Apply Animation Class
+        if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
+            root.classList.add(`anim-${chatBubbleAnimation}`);
+        }
+
+        // Apply Dynamic Styles via CSS Variables
+        root.style.setProperty('--bubble-glass', `${chatBubbleGlass}px`);
+        root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
+        root.style.setProperty('--bubble-border-width', `${chatBubbleBorderWidth}px`);
+        root.style.setProperty('--bubble-shadow-color', chatBubbleShadowColor);
+        root.style.setProperty('--bubble-shadow-blur', `${chatBubbleShadowBlur}px`);
+        // Calculate offset based on blur to give depth
+        root.style.setProperty('--bubble-shadow-offset', `${chatBubbleShadowBlur / 2}px`);
+        root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
+        root.style.setProperty('--bubble-glow-blur', `${chatBubbleGlowSpread}px`);
+    }
 
     // Determine permissions
     const userRoles = [];
@@ -162,14 +207,17 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     if (classes.includes('vip')) userRoles.push({ name: 'vip' });
     if (classes.includes('subscriber')) userRoles.push({ name: 'subscriber' });
 
+    // Attempt to parse badges from clone if classes aren't sufficient? 
+    // Classes are reliable enough for Streamer.bot usually.
+
     const canEmbed = checkEmbedPermission(userRoles);
 
     getAndReplaceLinks(messageEl).then(() => {
         multiStreamChat(messageEl);
+        const messageContent = messageEl.innerText.trim();
 
         /* Embed Images */
         if (embedImages && canEmbed) {
-            const messageContent = messageEl.innerText.trim();
             if (isImageUrl(messageContent)) {
                 const image = new Image();
                 image.onload = function () {
@@ -179,14 +227,54 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
                     messageEl.innerHTML = '';
                     messageEl.appendChild(image);
                 };
-
-                // Use DuckDuckGo proxy to avoid CORS and mixed content issues
                 image.src = "https://external-content.duckduckgo.com/iu/?u=" + messageContent;
             }
         }
+
+        /* Embed YouTube */
+        if (embedYouTube && canEmbed) {
+            const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+            const match = messageContent.match(ytRegex);
+            if (match && match[1]) {
+                const videoId = match[1];
+                const iframe = document.createElement('iframe');
+                iframe.width = "100%";
+                iframe.height = "250"; // Adjust height as needed
+                iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                iframe.frameBorder = "0";
+                iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                iframe.allowFullscreen = true;
+                iframe.style.borderRadius = "10px";
+                iframe.style.marginTop = "10px";
+
+                // If the message is JUST the link, clear it. Else append.
+                if (messageContent === match[0] || messageContent === match.input) {
+                    messageEl.innerHTML = '';
+                } else {
+                    messageEl.appendChild(document.createElement('br'));
+                }
+                messageEl.appendChild(iframe);
+            }
+        }
+
     });
 
     const platformElement = clone.querySelector('.platform');
+
+    // Chat Direction Application
+    if (chatDirection === "top") {
+        chatContainer.prepend(clone);
+    } else {
+        chatContainer.appendChild(clone);
+    }
+
+    // Move opacity fade-in to here so it happens after append/prepend
+    const inserted = document.getElementById(messageid);
+    if (inserted) {
+        // Force reflow
+        void inserted.offsetWidth;
+        inserted.style.opacity = '1';
+    }
 
     if (showPlatform == true) {
         let platformContent;
@@ -259,11 +347,7 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         }
     }
 
-    if (chatDirection === "top") {
-        chatContainer.prepend(clone);
-    } else {
-        chatContainer.appendChild(clone);
-    }
+    chatContainer.prepend(clone);
 
     const item = document.getElementById(messageid);
     const itemDimension = item.querySelector('.message')?.[`offset${dimensionProp}`] || 0;
@@ -275,7 +359,7 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         item.style[dimensionProp.toLowerCase()] = itemDimension + 'px';
         item.style.opacity = '1';
     });
-
+ 
     item.addEventListener('transitionend', () => {
         item.style[dimensionProp.toLowerCase()] = '';
         item.style.opacity = '';
@@ -366,7 +450,7 @@ function addEventItem(platform, clone, classes, userid, messageid) {
         item.style[dimensionProp.toLowerCase()] = itemDimension + 'px';
         item.style.opacity = '1';
     });
-
+ 
     item.addEventListener('transitionend', () => {
         item.style[dimensionProp.toLowerCase()] = '';
         item.style.opacity = '';
@@ -527,16 +611,16 @@ function formatSubMonthDuration(months) {
     /*if (months < 12) {
         return `${months} ${months === 1 ? 'Month' : 'Months'}`;
     }
-
+ 
     const years = Math.floor(months / 12);
     const remainingMonths = months % 12;
-
+ 
     const yearText = `${years} ${years === 1 ? 'Year' : 'Years'}`;
-
+ 
     const monthText = remainingMonths > 0 
         ? ` and ${remainingMonths} ${remainingMonths === 1 ? 'Month' : 'Months'}`
         : '';
-
+ 
     return `${yearText}${monthText}`;*/
     return `${months} ${months === 1 ? 'Month' : 'Months'}`;
 }
@@ -816,6 +900,13 @@ chatInputForm.addEventListener("submit", function (event) {
         }
     ).then((sendchatstuff) => {
         console.debug('[ChatRD] Sending Chat to Streamer.Bot', sendchatstuff);
+    }).catch(err => {
+        console.error('[ChatRD] Failed to send chat:', err);
+        pushNotify({
+            title: 'Send Failed',
+            text: 'Could not send message. Is Streamer.bot connected?',
+            status: 'error'
+        });
     });
 
     // Sends Message to TikTok that are not commands
@@ -828,7 +919,7 @@ chatInputForm.addEventListener("submit", function (event) {
                 }
             ).then((sendchatstuff) => {
                 console.debug('[ChatRD] Sending TikTok Chat to Streamer.Bot', sendchatstuff);
-            });
+            }).catch(err => console.error('[ChatRD] Failed to send TikTok chat:', err));
         }
     }
 
@@ -1089,7 +1180,22 @@ window.addEventListener('message', (event) => {
         // Update variables
         if (s.chatBubbles !== undefined) chatBubbles = (s.chatBubbles === 'true' || s.chatBubbles === true);
         if (s.embedImages !== undefined) embedImages = (s.embedImages === 'true' || s.embedImages === true);
+        if (s.embedYouTube !== undefined) embedYouTube = (s.embedYouTube === 'true' || s.embedYouTube === true);
         if (s.chatBubbleAnimation !== undefined) chatBubbleAnimation = s.chatBubbleAnimation;
+        if (s.chatBubbleGlass !== undefined) chatBubbleGlass = s.chatBubbleGlass;
+        if (s.chatBubbleBorderColor !== undefined) chatBubbleBorderColor = s.chatBubbleBorderColor;
+        if (s.chatBubbleBorderWidth !== undefined) chatBubbleBorderWidth = s.chatBubbleBorderWidth;
+        if (s.chatBubbleShadowColor !== undefined) chatBubbleShadowColor = s.chatBubbleShadowColor;
+        if (s.chatBubbleShadowBlur !== undefined) chatBubbleShadowBlur = s.chatBubbleShadowBlur;
+        if (s.chatBubbleGlowColor !== undefined) chatBubbleGlowColor = s.chatBubbleGlowColor;
+        if (s.chatBubbleGlowSpread !== undefined) chatBubbleGlowSpread = s.chatBubbleGlowSpread;
+
+        if (s.chatMessageStrokeColor !== undefined) chatMessageStrokeColor = s.chatMessageStrokeColor;
+        if (s.chatMessageStrokeWidth !== undefined) chatMessageStrokeWidth = Number(s.chatMessageStrokeWidth) || 0;
+        if (s.chatMessageShadowColor !== undefined) chatMessageShadowColor = s.chatMessageShadowColor;
+        if (s.chatMessageShadowBlur !== undefined) chatMessageShadowBlur = Number(s.chatMessageShadowBlur) || 0;
+        if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
+        if (s.chatMessageGlowSpread !== undefined) chatMessageGlowSpread = Number(s.chatMessageGlowSpread) || 0;
 
         // Update Embed Perms
         if (s.embedPermsBroadcaster !== undefined) embedPermsBroadcaster = (s.embedPermsBroadcaster === 'true' || s.embedPermsBroadcaster === true);
@@ -1108,6 +1214,49 @@ window.addEventListener('message', (event) => {
                 chatContainer.classList.add('direction-bottom');
                 chatContainer.classList.remove('direction-top');
             }
+        }
+
+        // Force update existing messages
+        document.querySelectorAll('.item').forEach(root => {
+            // Re-apply bubble class
+            if (chatBubbles) root.classList.add('chat-bubble');
+            else root.classList.remove('chat-bubble');
+
+            // Update Styles
+            root.style.setProperty('--bubble-glass', `${Number(chatBubbleGlass) || 0}px`);
+            root.style.setProperty('--bubble-border-color', chatBubbleBorderColor);
+            root.style.setProperty('--bubble-border-width', `${Number(chatBubbleBorderWidth) || 0}px`);
+            root.style.setProperty('--bubble-shadow-color', chatBubbleShadowColor);
+            root.style.setProperty('--bubble-shadow-blur', `${Number(chatBubbleShadowBlur) || 0}px`);
+            root.style.setProperty('--bubble-shadow-offset', `${(Number(chatBubbleShadowBlur) || 0) / 2}px`);
+            root.style.setProperty('--bubble-glow-color', chatBubbleGlowColor);
+            root.style.setProperty('--bubble-glow-blur', `${Number(chatBubbleGlowSpread) || 0}px`);
+
+            // Update Text Styles (Independent of Bubbles)
+            root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
+            root.style.setProperty('--text-stroke-width', `${Number(chatMessageStrokeWidth) || 0}px`);
+            root.style.setProperty('--text-shadow-color', chatMessageShadowColor);
+            root.style.setProperty('--text-shadow-blur', `${Number(chatMessageShadowBlur) || 0}px`);
+            root.style.setProperty('--text-shadow-offset', `${(Number(chatMessageShadowBlur) || 0) > 0 ? 2 : 0}px`);
+            root.style.setProperty('--text-glow-color', chatMessageGlowColor);
+            root.style.setProperty('--text-glow-spread', `${Number(chatMessageGlowSpread) || 0}px`);
+
+            // Update Animation
+            root.className = root.className.replace(/anim-\w+/g, "").trim(); // Remove old anim
+            if (chatBubbleAnimation && chatBubbleAnimation !== 'none') {
+                root.classList.add(`anim-${chatBubbleAnimation}`);
+            }
+        });
+    } else if (event.data.type === 'testMessage') {
+        const testClone = chatTemplate.content.cloneNode(true);
+        addMessageItem('twitch', testClone, [], 'testuser', 'test-' + Date.now());
+        const root = document.getElementById('test-' + Date.now()) || document.querySelector('.item:last-child');
+
+        if (root) {
+            root.querySelector('.user').textContent = "TestUser";
+            root.querySelector('.actual-message').textContent = event.data.text || "This is a test message to preview your visual settings! 😎";
+            root.querySelector('.platform').innerHTML = '<img src="js/modules/twitch/images/logo-twitch.svg">';
+            root.style.opacity = 1;
         }
     }
 });
