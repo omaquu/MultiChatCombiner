@@ -829,10 +829,20 @@ async function twitchChatClearMessages() {
 
 
 async function twitchUpdateStatistics(data) {
-    if (showPlatformStatistics == false || showTwitchViewers == false) return;
+    console.debug('[Twitch] Statistics Update Received:', data);
+    if (showPlatformStatistics == false || showTwitchViewers == false) {
+        console.debug('[Twitch] Statistics hidden by settings (showPlatformStatistics:', showPlatformStatistics, 'showTwitchViewers:', showTwitchViewers, ')');
+        return;
+    }
 
     const viewers = formatNumber(DOMPurify.sanitize(data.viewerCount)) || "0";
-    document.querySelector('#statistics #twitch .viewers span').textContent = viewers;
+    console.debug('[Twitch] Updating viewers to:', viewers);
+    const element = document.querySelector('#statistics #twitch .viewers span');
+    if (element) {
+        element.textContent = viewers;
+    } else {
+        console.error('[Twitch] Viewer count element not found!');
+    }
 }
 
 
