@@ -1130,30 +1130,34 @@ window.addEventListener('message', (event) => {
         }
     }
 });
-// Test Message Button
-const testBtn = document.getElementById('sendTestMessageBtn');
-if (testBtn) {
-    testBtn.addEventListener('click', () => {
-        const platforms = ['twitch', 'youtube', 'kick', 'tiktok'];
-        const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-        const randomUser = "TestUser_" + Math.floor(Math.random() * 1000);
+document.addEventListener('DOMContentLoaded', () => {
+    pushChatInputSettings();
+    loadChatInputSettingFromLocalStorage();
 
-        // Mock a message item
-        const clone = chatTemplate.content.cloneNode(true);
-        const classes = [randomPlatform, 'item', 'chat'];
+    // Test Message Button
+    const testBtn = document.getElementById('sendTestMessageBtn');
+    if (testBtn) {
+        testBtn.addEventListener('click', () => {
+            const platforms = ['twitch', 'youtube', 'kick', 'tiktok'];
+            const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+            const randomUser = "TestUser_" + Math.floor(Math.random() * 1000);
 
-        // Populate Clone
-        clone.querySelector('.user').textContent = randomUser;
-        clone.querySelector('.actual-message').innerHTML = "This is a test message with effects! " + new Date().toLocaleTimeString();
+            // Mock a message item
+            const clone = chatTemplate.content.cloneNode(true);
+            const classes = [randomPlatform, 'item', 'chat'];
 
-        // Random Badges?
-        const badges = clone.querySelector('.badges');
-        if (badges) badges.innerHTML = ''; // Clear for test
+            // Populate Clone
+            clone.querySelector('.user').textContent = randomUser;
+            clone.querySelector('.actual-message').innerHTML = "This is a test message with effects! " + new Date().toLocaleTimeString();
 
-        // Add
-        addMessageItem(randomPlatform, clone, classes, randomUser, "msg_" + Date.now());
-    });
-}
+            // Random Badges?
+            const badges = clone.querySelector('.badges');
+            if (badges) badges.innerHTML = ''; // Clear for test
+
+            // Add
+            addMessageItem(randomPlatform, clone, classes, randomUser, "msg_" + Date.now());
+        });
+    }
 });
 
 
