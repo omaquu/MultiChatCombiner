@@ -1104,21 +1104,3 @@ async function getTwitchUserPronouns(username) {
     }
 }
 
-
-if (showTwitch) {
-
-    const twitchStatistics = `
-        <div class="platform" id="twitch" style="display: none;">
-            <img src="js/modules/twitch/images/logo-twitch.svg" alt="">
-            <span class="viewers"><i class="fa-solid fa-user"></i> <span>0</span></span>
-        </div>
-    `;
-
-    document.querySelector('#statistics').insertAdjacentHTML('beforeend', twitchStatistics);
-
-    if (showTwitchViewers == true) { document.querySelector('#statistics #twitch').style.display = ''; }
-
-    console.debug('[Twitch][Debug] Module Initialized (Immediate)');
-
-    registerPlatformHandlersToStreamerBot(twitchMessageHandlers, '[Twitch][SB1]');
-}
