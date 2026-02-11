@@ -246,29 +246,12 @@ body {
 #chat .item .actual-message {
     /*margin-top: 3px;*/
     font-weight: 300;
-
-    /* Text Outline (Simulated via Shadow) */
-    text-shadow:
-        calc(-1 * var(--text-stroke-width, 0px)) calc(-1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
-        calc(1 * var(--text-stroke-width, 0px)) calc(-1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
-        calc(-1 * var(--text-stroke-width, 0px)) calc(1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
-        calc(1 * var(--text-stroke-width, 0px)) calc(1 * var(--text-stroke-width, 0px)) 0 var(--text-stroke-color, transparent),
-
-        /* Standard Shadow */
-        var(--text-shadow-offset, 2px) var(--text-shadow-offset, 2px) var(--text-shadow-blur, 0px) var(--text-shadow-color, transparent),
-
-        /* Glow */
-        0 0 var(--text-glow-spread, 0px) var(--text-glow-color, transparent);
 }
 
 #chat .item .actual-message img {
     vertical-align: middle;
     height: 28px;
     margin: 1px;
-}
-
-.watery-text {
-    filter: url(#watery);
 }
 
 
@@ -919,111 +902,25 @@ body {
 /* ---- CHAT BUBBLES ----- */
 /* ----------------------- */
 
-/* ----------------------- */
-/* ---- CHAT BUBBLES ----- */
-/* ----------------------- */
-
 .chat-bubble .message {
-    /* Base styles - will be overridden by inline styles from settings */
     background: rgba(0, 0, 0, 0.5);
-    /* Fallback */
     border-radius: 15px;
     padding: 10px;
-
-    /* Variables for advanced visuals */
-    backdrop-filter: blur(var(--bubble-glass, 0px));
-    border: var(--bubble-border-width, 0px) solid var(--bubble-border-color, transparent);
-    box-shadow:
-        var(--bubble-shadow-offset, 0px) 4px var(--bubble-shadow-blur, 6px) var(--bubble-shadow-color, rgba(0, 0, 0, 0.1)),
-        0 0 var(--bubble-glow-blur, 0px) var(--bubble-glow-color, transparent);
-
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .chat-bubble .info {
     margin-bottom: 5px;
 }
 
-/* Animations */
-.anim-pop {
-    animation: bubblePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-.anim-slideLeft {
-    animation: slideInLeft 0.3s ease-out forwards;
-}
-
-.anim-slideRight {
-    animation: slideInRight 0.3s ease-out forwards;
-}
-
-.anim-fade {
-    animation: fadeIn 0.4s ease-out forwards;
-}
-
-.anim-bounce {
-    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+.chat-bubble-animated {
+    animation: bubblePop 0.3s ease-out;
 }
 
 @keyframes bubblePop {
     0% {
-        transform: scale(0.5);
+        transform: scale(0.8);
         opacity: 0;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-@keyframes slideInLeft {
-    0% {
-        transform: translateX(-50px);
-        opacity: 0;
-    }
-
-    100% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideInRight {
-    0% {
-        transform: translateX(50px);
-        opacity: 0;
-    }
-
-    100% {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-@keyframes bounceIn {
-    0% {
-        transform: scale(0.3);
-        opacity: 0;
-    }
-
-    50% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-
-    70% {
-        transform: scale(0.9);
     }
 
     100% {
