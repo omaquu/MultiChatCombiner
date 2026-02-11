@@ -36,6 +36,43 @@ const embedYouTube = getURLParam("embedYouTube", false);
 const chatBubbles = getURLParam("chatBubbles", false);
 const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
 
+// Chat Direction
+let chatDirection = getURLParam("chatDirection", "bottom"); // 'bottom' or 'top'
+
+// Embed Permissions
+let embedPermsBroadcaster = getURLParam("embedPermsBroadcaster", true);
+let embedPermsMod = getURLParam("embedPermsMod", true);
+let embedPermsVip = getURLParam("embedPermsVip", true);
+let embedPermsSub = getURLParam("embedPermsSub", false);
+let embedPermsEveryone = getURLParam("embedPermsEveryone", false);
+
+function checkEmbedPermission(badges) {
+    if (embedPermsEveryone) return true;
+
+    let isBroadcaster = false;
+    let isMod = false;
+    let isVip = false;
+    let isSub = false;
+
+    if (badges) {
+        badges.forEach(b => {
+            const name = (b.name || "").toLowerCase();
+            const id = (b.id || "").toLowerCase(); // Check ID too just in case
+            if (name === "broadcaster" || id === "broadcaster") isBroadcaster = true;
+            if (name === "moderator" || id === "moderator") isMod = true;
+            if (name === "vip" || id === "vip") isVip = true;
+            if (name === "subscriber" || id === "subscriber" || name === "founder" || id === "founder") isSub = true;
+        });
+    }
+
+    if (embedPermsBroadcaster && isBroadcaster) return true;
+    if (embedPermsMod && isMod) return true;
+    if (embedPermsVip && isVip) return true;
+    if (embedPermsSub && isSub) return true;
+
+    return false;
+}
+
 // Advanced Visuals Params
 const chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
 const chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
@@ -54,7 +91,7 @@ let chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
 let chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
 let chatMessageWatery = getURLParam("chatMessageWatery", false);
 
-const chatContainer = document.querySelector('#chat');
+
 
 const chatTemplate = document.querySelector('#chat-message');
 const eventTemplate = document.querySelector('#event-message');
@@ -124,8 +161,10 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     root.classList.add(...classes);
     root.dataset.user = userid;
     root.id = messageid;
-    root.id = messageid;
     root.style.opacity = '0';
+
+    const messageEl = clone.querySelector('.actual-message');
+    const infoEl = clone.querySelector('.info');
 
     // Apply Text Effects (Independent of Bubbles)
     root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
@@ -161,15 +200,24 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         root.style.setProperty('--bubble-glow-blur', `${chatBubbleGlowSpread}px`);
     }
 
-    const messageEl = clone.querySelector('.actual-message');
-    const infoEl = clone.querySelector('.info');
+    // Determine permissions
+    const userRoles = [];
+    if (classes.includes('broadcaster') || classes.includes('owner')) userRoles.push({ name: 'broadcaster' });
+    if (classes.includes('moderator')) userRoles.push({ name: 'moderator' });
+    if (classes.includes('vip')) userRoles.push({ name: 'vip' });
+    if (classes.includes('subscriber')) userRoles.push({ name: 'subscriber' });
+
+    // Attempt to parse badges from clone if classes aren't sufficient? 
+    // Classes are reliable enough for Streamer.bot usually.
+
+    const canEmbed = checkEmbedPermission(userRoles);
 
     getAndReplaceLinks(messageEl).then(() => {
         multiStreamChat(messageEl);
         const messageContent = messageEl.innerText.trim();
 
         /* Embed Images */
-        if (embedImages) {
+        if (embedImages && canEmbed) {
             if (isImageUrl(messageContent)) {
                 const image = new Image();
                 image.onload = function () {
@@ -184,7 +232,7 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         }
 
         /* Embed YouTube */
-        if (embedYouTube) {
+        if (embedYouTube && canEmbed) {
             const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
             const match = messageContent.match(ytRegex);
             if (match && match[1]) {
@@ -212,6 +260,23 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     });
 
     const platformElement = clone.querySelector('.platform');
+
+    // Apply Chat Direction Class
+    if (chatDirection === "top") {
+        chatContainer.classList.add('direction-top');
+        chatContainer.classList.remove('direction-bottom');
+    } else {
+        chatContainer.classList.add('direction-bottom');
+        chatContainer.classList.remove('direction-top');
+    }
+
+    // Move opacity fade-in to here so it happens after append/prepend
+    const inserted = document.getElementById(messageid);
+    if (inserted) {
+        // Force reflow
+        void inserted.offsetWidth;
+        inserted.style.opacity = '1';
+    }
 
     if (showPlatform == true) {
         let platformContent;
@@ -1034,9 +1099,61 @@ async function getAndReplaceLinks(el) {
 }
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    pushChatInputSettings();
-    loadChatInputSettingFromLocalStorage();
+/* Listen for Live Updates */
+window.addEventListener('message', (event) => {
+    if (event.data.type === 'updateSettings') {
+        const s = event.data.settings;
+
+        // Update variables
+        if (s.chatBubbles !== undefined) chatBubbles = (s.chatBubbles === 'true' || s.chatBubbles === true);
+        if (s.embedImages !== undefined) embedImages = (s.embedImages === 'true' || s.embedImages === true);
+        if (s.embedYouTube !== undefined) embedYouTube = (s.embedYouTube === 'true' || s.embedYouTube === true);
+        if (s.chatBubbleAnimation !== undefined) chatBubbleAnimation = s.chatBubbleAnimation;
+
+        // Update Embed Perms
+        if (s.embedPermsBroadcaster !== undefined) embedPermsBroadcaster = (s.embedPermsBroadcaster === 'true' || s.embedPermsBroadcaster === true);
+        if (s.embedPermsMod !== undefined) embedPermsMod = (s.embedPermsMod === 'true' || s.embedPermsMod === true);
+        if (s.embedPermsVip !== undefined) embedPermsVip = (s.embedPermsVip === 'true' || s.embedPermsVip === true);
+        if (s.embedPermsSub !== undefined) embedPermsSub = (s.embedPermsSub === 'true' || s.embedPermsSub === true);
+        if (s.embedPermsEveryone !== undefined) embedPermsEveryone = (s.embedPermsEveryone === 'true' || s.embedPermsEveryone === true);
+
+        // Update Chat Direction
+        if (s.chatDirection !== undefined) {
+            chatDirection = s.chatDirection;
+            if (chatDirection === "top") {
+                chatContainer.classList.add('direction-top');
+                chatContainer.classList.remove('direction-bottom');
+            } else {
+                chatContainer.classList.add('direction-bottom');
+                chatContainer.classList.remove('direction-top');
+            }
+        }
+    }
+});
+// Test Message Button
+const testBtn = document.getElementById('sendTestMessageBtn');
+if (testBtn) {
+    testBtn.addEventListener('click', () => {
+        const platforms = ['twitch', 'youtube', 'kick', 'tiktok'];
+        const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+        const randomUser = "TestUser_" + Math.floor(Math.random() * 1000);
+
+        // Mock a message item
+        const clone = chatTemplate.content.cloneNode(true);
+        const classes = [randomPlatform, 'item', 'chat'];
+
+        // Populate Clone
+        clone.querySelector('.user').textContent = randomUser;
+        clone.querySelector('.actual-message').innerHTML = "This is a test message with effects! " + new Date().toLocaleTimeString();
+
+        // Random Badges?
+        const badges = clone.querySelector('.badges');
+        if (badges) badges.innerHTML = ''; // Clear for test
+
+        // Add
+        addMessageItem(randomPlatform, clone, classes, randomUser, "msg_" + Date.now());
+    });
+}
 });
 
 
@@ -1133,6 +1250,25 @@ window.addEventListener('message', (event) => {
         if (s.chatMessageShadowBlur !== undefined) chatMessageShadowBlur = Number(s.chatMessageShadowBlur) || 0;
         if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
         if (s.chatMessageGlowSpread !== undefined) chatMessageGlowSpread = Number(s.chatMessageGlowSpread) || 0;
+
+        // Update Embed Perms
+        if (s.embedPermsBroadcaster !== undefined) embedPermsBroadcaster = (s.embedPermsBroadcaster === 'true' || s.embedPermsBroadcaster === true);
+        if (s.embedPermsMod !== undefined) embedPermsMod = (s.embedPermsMod === 'true' || s.embedPermsMod === true);
+        if (s.embedPermsVip !== undefined) embedPermsVip = (s.embedPermsVip === 'true' || s.embedPermsVip === true);
+        if (s.embedPermsSub !== undefined) embedPermsSub = (s.embedPermsSub === 'true' || s.embedPermsSub === true);
+        if (s.embedPermsEveryone !== undefined) embedPermsEveryone = (s.embedPermsEveryone === 'true' || s.embedPermsEveryone === true);
+
+        // Update Chat Direction
+        if (s.chatDirection !== undefined) {
+            chatDirection = s.chatDirection;
+            if (chatDirection === "top") {
+                chatContainer.classList.add('direction-top');
+                chatContainer.classList.remove('direction-bottom');
+            } else {
+                chatContainer.classList.add('direction-bottom');
+                chatContainer.classList.remove('direction-top');
+            }
+        }
 
         // Force update existing messages
         document.querySelectorAll('.item').forEach(root => {
