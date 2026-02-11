@@ -33,11 +33,11 @@ function saveSettingsToLocalStorage() {
 
 
 async function saveYouTubeCustomEmotes() {
-    try {
-        const youtubeMemberEmotes = document.querySelector("textarea[name=youTubeCustomEmotes]:not(.avoid)");
+    try {	
+    	const youtubeMemberEmotes = document.querySelector("textarea[name=youTubeCustomEmotes]:not(.avoid)");
         youtubeSaveMemberEmotes(JSON.parse(youtubeMemberEmotes.value));
     }
-    catch (err) {
+	catch (err) {
         console.error("[ChatRD] Emotes JSON inválido", err);
     }
 }
@@ -46,13 +46,13 @@ async function loadYouTubeCustomEmotes() {
 
     youtubeLoadMemberEmotes().then(settings => {
         if (settings) {
-            const youtubeMemberEmotes = document.querySelector("textarea[name=youTubeCustomEmotes]:not(.avoid)");
+    		const youtubeMemberEmotes = document.querySelector("textarea[name=youTubeCustomEmotes]:not(.avoid)");
             console.log('[ChatRD][Settings] YouTube Member Emotes Loaded', settings);
             youtubeMemberEmotes.value = JSON.stringify(settings);
             populateEmoteList();
         }
     });
-
+    
 }
 
 /* -------------------------
@@ -84,8 +84,8 @@ async function saveStreamerBotSettings() {
     const streamerBotServerPort = document.querySelector('input[type=text][name=streamerBotServerPort]').value;
 
     const settings = {
-        streamerBotServerAddress: streamerBotServerAddress,
-        streamerBotServerPort: streamerBotServerPort
+        streamerBotServerAddress : streamerBotServerAddress,
+        streamerBotServerPort : streamerBotServerPort
     }
 
     localStorage.setItem("chatrdStreamerBotSettings", JSON.stringify(settings));
@@ -123,84 +123,9 @@ function pushChangeEvents() {
         document.querySelector('#font-value').textContent = Math.floor(this.value * 100) + '%';
     });
 
-
     document.querySelector('#bg-opacity-slider').addEventListener('input', function () {
         document.querySelector('#bg-opacity-value').textContent = Math.floor(this.value * 100) + '%';
     });
-}
-
-function exportSettings() {
-    const checkboxes = document.querySelectorAll("input[type=checkbox]:not(.avoid)");
-    const textfields = document.querySelectorAll("input[type=text]:not(.avoid)");
-    const numberfields = document.querySelectorAll("input[type=number]:not(.avoid)");
-    const colorfields = document.querySelectorAll("input[type=color]:not(.avoid)");
-    const selects = document.querySelectorAll("select:not(.avoid)");
-    const ranges = document.querySelectorAll("input[type=range]:not(.avoid)");
-    const settings = {};
-
-    checkboxes.forEach(cb => settings[cb.name] = cb.checked);
-    ranges.forEach(r => settings[r.name] = r.value);
-    textfields.forEach(tf => settings[tf.name] = tf.value);
-    numberfields.forEach(nf => settings[nf.name] = nf.value);
-    colorfields.forEach(cf => settings[cf.name] = cf.value);
-    selects.forEach(s => settings[s.name] = s.value);
-
-    // Also include textareas (for custom emotes)
-    const textareas = document.querySelectorAll("textarea:not(.avoid)");
-    textareas.forEach(ta => settings[ta.name] = ta.value);
-
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(settings, null, 2));
-    const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", "chatrd_settings.json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-}
-
-function importSettings(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            const settings = JSON.parse(e.target.result);
-
-            Object.keys(settings).forEach(key => {
-                const el = document.querySelector(`[name="${key}"]`);
-                if (el) {
-                    if (el.type === "checkbox") {
-                        el.checked = settings[key];
-                    } else {
-                        el.value = settings[key];
-                    }
-                    // Trigger change event to update any dependent logic
-                    el.dispatchEvent(new Event('change'));
-                    el.dispatchEvent(new Event('input'));
-                }
-            });
-
-            // Update UI components that might not auto-update
-            document.querySelector('#font-value').textContent = Math.floor(document.querySelector('#font-slider').value * 100) + '%';
-            document.querySelector('#bg-opacity-value').textContent = Math.floor(document.querySelector('#bg-opacity-slider').value * 100) + '%';
-
-            saveSettingsToLocalStorage();
-            generateUrl();
-
-            // Re-populate lists if needed (e.g. emotes)
-            populateEmoteList();
-
-            alert("Settings imported successfully!");
-
-        } catch (error) {
-            console.error("Error importing settings:", error);
-            alert("Error importing settings. Please check the file format.");
-        }
-    };
-    reader.readAsText(file);
-    // Reset input so same file can be selected again
-    input.value = '';
 }
 
 /* -------------------------
@@ -244,54 +169,11 @@ function generateUrl() {
     textfields.forEach(tf => params.set(tf.name, tf.value));
     numberfields.forEach(nf => params.set(nf.name, nf.value));
 
-    var finalChatRDURL = baseUrl + '?' + params.toString() + `&streamerBotServerAddress=${streamerBotServerAddress}&streamerBotServerPort=${streamerBotServerPort}`;
-    outputField.value = finalChatRDURL;
-
+    var finalChatRDURL = baseUrl + '?' + params.toString() + `&streamerBotServerAddress=${streamerBotServerAddress}&streamerBotServerPort=${streamerBotServerPort}`; 
+    outputField.value = finalChatRDURL
     const iframe = document.querySelector('#preview iframe');
-    if (iframe) {
-        const currentSrc = iframe.src;
-        const currentBase = currentSrc.split('?')[0];
-        const newBase = finalChatRDURL.split('?')[0];
-
-        // Only reload if base URL changed or it's empty
-        if (currentSrc === "" || currentSrc === "about:blank" || currentBase !== newBase) {
-            iframe.src = finalChatRDURL;
-            iframe.onload = () => {
-                // Send initial settings after load just in case (optional, but good for sync)
-                iframe.contentWindow.postMessage({
-                    type: 'updateSettings',
-                    settings: Object.fromEntries(params)
-                }, '*');
-            };
-        } else {
-            // Send settings update to iframe without reload
-            const settingsObj = {};
-            params.forEach((value, key) => { settingsObj[key] = value; });
-
-            iframe.contentWindow.postMessage({
-                type: 'updateSettings',
-                settings: settingsObj
-            }, '*');
-        }
-    }
+    if (iframe) { iframe.src = finalChatRDURL; }
 }
-
-// Add Test Message Listener
-document.addEventListener('DOMContentLoaded', () => {
-    const testBtn = document.getElementById('sendTestMessageBtn');
-    if (testBtn) {
-        testBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const iframe = document.querySelector('#preview iframe');
-            if (iframe && iframe.contentWindow) {
-                iframe.contentWindow.postMessage({
-                    type: 'testMessage',
-                    text: "This is a test message to preview your visual settings! 😎"
-                }, '*');
-            }
-        });
-    }
-});
 
 
 /* -------------------------
@@ -330,7 +212,7 @@ function setupPlatformToggles() {
 
         if (toggle && setupDiv) {
             // Removido: initializeTransitionStyles(setupDiv);
-
+            
             // Defina o overflow no CSS ou aqui, se preferir
             setupDiv.style.overflow = 'hidden';
             setupDiv.style.transition = 'max-height 0.4s ease, opacity 0.4s ease';
@@ -354,7 +236,7 @@ function setupPlatformToggles() {
             element.style.maxHeight = '0px';
             element.style.opacity = '0';
             element.offsetHeight; // Força a renderização
-
+            
             // Inicia a transição para a altura real e opacidade completa
             element.style.maxHeight = element.scrollHeight + 'px';
             element.style.opacity = '1';
@@ -367,12 +249,12 @@ function setupPlatformToggles() {
             });
 
         }
-
+        
         else {
             // Define o maxHeight para a altura atual antes de iniciar a transição de fechamento
             element.style.maxHeight = element.scrollHeight + 'px';
             element.offsetHeight; // Força a renderização
-
+            
             // Inicia a transição para fechar o elemento
             element.style.maxHeight = '0px';
             element.style.opacity = '0';
@@ -388,7 +270,7 @@ function setupPlatformToggles() {
 
     // A função initializeTransitionStyles() foi removida.
     // O estilo de transição foi movido para a função principal para ser definido uma única vez.
-
+    
     function capitalize(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
