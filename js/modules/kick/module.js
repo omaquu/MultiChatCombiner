@@ -2,21 +2,21 @@
 /* KICK MODULE VARIABLES */
 /* ---------------------- */
 
-const showKick                      = getURLParam("showKick", false);
+const showKick = getURLParam("showKick", false);
 
-const kickUserName                  = getURLParam("kickUserName", "");
+const kickUserName = getURLParam("kickUserName", "");
 
-const showKickMessages              = getURLParam("showKickMessages", true);
-const showKickFollows               = getURLParam("showKickFollows", true);
-const showKickKicks                 = getURLParam("showKickKicks", true);
-const showSmallKicksGifts           = getURLParam("showSmallKicksGifts", false);
-const showKickSubs                  = getURLParam("showKickSubs", true);
-const showKickGiftedSubs            = getURLParam("showKickGiftedSubs", true);
-const showKickMassGiftedSubs        = getURLParam("showKickMassGiftedSubs", true);
-const showKickGiftedSubsUserTrain   = getURLParam("showKickGiftedSubsUserTrain", true);
-const showKickRewardRedemptions     = getURLParam("showKickRewardRedemptions", true);
-const showKickRaids                 = getURLParam("showKickRaids", true);
-const showKickViewers               = getURLParam("showKickViewers", true);
+const showKickMessages = getURLParam("showKickMessages", true);
+const showKickFollows = getURLParam("showKickFollows", true);
+const showKickKicks = getURLParam("showKickKicks", true);
+const showSmallKicksGifts = getURLParam("showSmallKicksGifts", false);
+const showKickSubs = getURLParam("showKickSubs", true);
+const showKickGiftedSubs = getURLParam("showKickGiftedSubs", true);
+const showKickMassGiftedSubs = getURLParam("showKickMassGiftedSubs", true);
+const showKickGiftedSubsUserTrain = getURLParam("showKickGiftedSubsUserTrain", true);
+const showKickRewardRedemptions = getURLParam("showKickRewardRedemptions", true);
+const showKickRaids = getURLParam("showKickRaids", true);
+const showKickViewers = getURLParam("showKickViewers", true);
 
 const kickAvatars = new Map();
 const kick7TVEmojis = new Map();
@@ -25,16 +25,16 @@ const kickSubBadges = [];
 const kickWebSocketURL = 'wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0&flash=false';
 
 const kicksGiftsClasses = [
-    { min: 1,  max: 9, class: 'normal-gift' },
-    { min: 10,  max: 49, class: 'bigger-than-10' },
-    { min: 50,  max: 99, class: 'bigger-than-50' },
-    { min: 100,  max: 499, class: 'bigger-than-100' },
-    { min: 500,  max: 999, class: 'bigger-than-500' },
-    { min: 1000,  max: 4999, class: 'bigger-than-1000' },
-    { min: 5000,  max: 9999, class: 'bigger-than-5000' },
-    { min: 10000,  max: 49999, class: 'bigger-than-10000' },
-    { min: 50000,  max: 99999, class: 'bigger-than-50000' },
-    { min: 100000,  max: 99999999999, class: 'bigger-than-100000' },
+    { min: 1, max: 9, class: 'normal-gift' },
+    { min: 10, max: 49, class: 'bigger-than-10' },
+    { min: 50, max: 99, class: 'bigger-than-50' },
+    { min: 100, max: 499, class: 'bigger-than-100' },
+    { min: 500, max: 999, class: 'bigger-than-500' },
+    { min: 1000, max: 4999, class: 'bigger-than-1000' },
+    { min: 5000, max: 9999, class: 'bigger-than-5000' },
+    { min: 10000, max: 49999, class: 'bigger-than-10000' },
+    { min: 50000, max: 99999, class: 'bigger-than-50000' },
+    { min: 100000, max: 99999999999, class: 'bigger-than-100000' },
 ];
 
 
@@ -70,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
         console.debug('[Kick][Debug] DOMContentLoaded fired');
 
         registerPlatformHandlersToStreamerBot(kickMessageHandlers, '[Kick][SB1]');
-        
+
         kickConnection();
     }
-    
+
 });
 
 
@@ -90,7 +90,7 @@ async function kickConnection() {
     const kickMaxTries = 20;
     const kickReconnectDelay = 10000;
     let retryCount = 0;
-    
+
 
 
     async function connect() {
@@ -111,9 +111,9 @@ async function kickConnection() {
                 console.error(`[Kick] Could not find chatroom id for ${kickUserName}!`);
                 return;
             }
-            
+
             console.debug(`[Kick] Chatroom for ${kickUserName} Found! (ID: ${kickChatRoomId})`);
-            
+
             kickSubBadges.push(...kickUserInfo.subscriber_badges);
 
             const kickWebSocket = new WebSocket(kickWebSocketURL);
@@ -129,7 +129,7 @@ async function kickConnection() {
                 });
 
 
-                
+
                 // Getting 7TV User Emotes and Global Emotes
                 (async () => {
                     const kick7TVEmotes = await getKick7TVEmotes(kickUserId);
@@ -160,7 +160,7 @@ async function kickConnection() {
                 console.debug(`[Kick] ${kickEvent}`, kickData);
 
                 if (data.event === 'pusher:connection_established') {
-                    
+
                     console.debug(`[Kick][Pusher] Connection established! (ID:${kickData.socket_id})`);
 
                     const channels = [
@@ -227,7 +227,7 @@ async function kickConnection() {
         }
         catch (error) {
             setTimeout(connect, kickReconnectDelay);
-            
+
             /*console.error(`[Kick] Failed to connect: ${error.message}`);
 
             if (retryCount < kickMaxTries) {
@@ -257,13 +257,13 @@ async function kickConnection() {
 // KICK UTILITY FUNCTIONS
 
 async function kickChatMessage(data) {
-    
+
     if (showKickMessages == false) return;
     if (ignoreUserList.includes(data.sender.username.toLowerCase())) return;
-    if (data.content.startsWith("!") && excludeCommands == true)  return;
+    if (data.content.startsWith("!") && excludeCommands == true) return;
 
-	const template = chatTemplate;
-	const clone = template.content.cloneNode(true);
+    const template = chatTemplate;
+    const clone = template.content.cloneNode(true);
     const messageId = data.id;
     const userId = data.sender.id;
     const userSlug = data.sender.slug;
@@ -271,7 +271,7 @@ async function kickChatMessage(data) {
     const {
         'first-message': firstMessage,
         'shared-chat': sharedChat,
-        
+
         header,
         timestamp,
         platform,
@@ -279,7 +279,7 @@ async function kickChatMessage(data) {
         avatar,
         pronouns: pronoun,
         user,
-        
+
         reply,
         'actual-message': message
     } = Object.fromEntries(
@@ -308,7 +308,7 @@ async function kickChatMessage(data) {
     if (showBadges) {
         if (!badgesHTML) { badges.remove(); }
         else { badges.innerHTML = badgesHTML; }
-     }
+    }
     else { badges.remove(); }
 
     if (data.type == "reply") {
@@ -321,7 +321,9 @@ async function kickChatMessage(data) {
     sharedChat.remove();
     pronoun.remove();
 
-    addMessageItem('kick', clone, classes, userSlug, messageId);
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, data, 'kick');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, data, 'kick');
+    addMessageItem('kick', clone, classes, userSlug, messageId, canEmbedImages, canEmbedYouTube);
 }
 
 
@@ -331,7 +333,7 @@ async function kickFollowMessage(data) {
     if (showKickFollows == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = data.user.login.toLowerCase();
     //const userId = data.userName.toLowerCase();
@@ -351,12 +353,12 @@ async function kickFollowMessage(data) {
     const classes = ['kick', 'follow'];
 
     header.remove();
-    
+
     user.textContent = data.user.name;
     //user.innerHTML = `<strong>${data.userName}</strong>`;
 
     action.innerHTML = ` followed you`;
-    
+
     value.remove()
 
     message.remove();
@@ -371,7 +373,7 @@ async function kickKicksGiftedMessage(data) {
     if (showKickKicks == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = data.sender.username.toLowerCase();
 
@@ -395,7 +397,7 @@ async function kickKicksGiftedMessage(data) {
 
     var kicksGiftId = data.gift.gift_id.replace('_', '-');
     var kicksGiftImage = `<img class="gift-image" src="https://files.kick.com/kicks/gifts/${kicksGiftId}.webp" alt="${data.gift.name}">`;
-    
+
     user.textContent = data.sender.username;
     action.innerHTML = ` sent a <strong>${data.gift.name}</strong> `;
 
@@ -427,7 +429,7 @@ async function kickSubMessage(data) {
     if (showKickSubs == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = data.username.toLowerCase();
 
@@ -453,7 +455,7 @@ async function kickSubMessage(data) {
 
     //var months = data.months > 1 ? 'months' : 'month';
     var months = formatSubMonthDuration(data.months);
-    
+
     value.innerHTML = `<strong>${months}</strong>`;
 
     message.remove();
@@ -468,7 +470,7 @@ async function kickGiftMessage(data) {
     if (showKickGiftedSubs == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = data.gifter_username.toLowerCase();
 
@@ -488,35 +490,35 @@ async function kickGiftMessage(data) {
 
     header.remove();
 
-    
+
     user.textContent = data.gifter_username;
 
     var giftedLength = data.gifted_usernames.length;
-    
+
     if (giftedLength > 1 && showKickMassGiftedSubs == true) {
         action.innerHTML = ` gifted <strong>${giftedLength} subs</strong> to the Community`;
         message.innerHTML = `They've gifted a total of <strong>${data.gifter_total} subs</strong>`;
         value.remove();
 
-        if (showKickGiftedSubsUserTrain == true) {    
+        if (showKickGiftedSubsUserTrain == true) {
             for (recipients of data.gifted_usernames) {
                 kickGiftSingleSub(data.gifter_username, recipients);
-            }   
+            }
         }
-        
+
         addEventItem('kick', clone, classes, userId, messageId);
     }
     else {
         kickGiftSingleSub(data.gifter_username, data.gifted_usernames[0]);
     }
-    
+
 }
 
 
 
 async function kickGiftSingleSub(gifter, recipient) {
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = gifter.toLowerCase();
 
@@ -540,7 +542,7 @@ async function kickGiftSingleSub(gifter, recipient) {
     user.textContent = gifter;
 
     action.innerHTML = ` gifted a subscription to `;
-    
+
     value.innerHTML = `<strong>${escapeHTML(recipient)}</strong>`;
 
     addEventItem('kick', clone, classes, userId, messageId);
@@ -553,7 +555,7 @@ async function kickRewardRedemption(data) {
     if (showKickRewardRedemptions == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = data.username.toLowerCase();
 
@@ -576,7 +578,7 @@ async function kickRewardRedemption(data) {
     user.textContent = data.username;
     action.innerHTML = ` redeemed `;
     value.innerHTML = `<strong>${data.reward_title}</strong>`;
-    
+
     var userInput = data.user_input ? `${data.user_input}` : '';
     message.innerHTML = `${userInput}`;
 
@@ -591,7 +593,7 @@ async function kickRaidMessage(data) {
     if (showKickRaids == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = createRandomString(40);
     const userId = data.host_username.toLowerCase();
 
@@ -659,8 +661,8 @@ async function kickUpdateStatistics(data) {
 
 
 async function kickGetUserInfo(user) {
-    const response = await fetch( `https://kick.com/api/v2/channels/${user}` );
-    
+    const response = await fetch(`https://kick.com/api/v2/channels/${user}`);
+
     if (response.status === 404) {
         console.error("[Kick] User was not found!");
         return 404;
@@ -688,13 +690,13 @@ async function getKickAvatar(user) {
         const rawPic = response?.user?.profile_pic;
 
         const avatarUrl = (typeof rawPic === "string" && rawPic)
-          ? rawPic.replace(/fullsize\.webp$/, "medium.webp")
-          : DEFAULT_AVATAR;
+            ? rawPic.replace(/fullsize\.webp$/, "medium.webp")
+            : DEFAULT_AVATAR;
 
         kickAvatars.set(user, avatarUrl);
         return avatarUrl;
     }
-    
+
     catch (error) {
         console.warn(`[Kick] Error getting Kick avatar for ${user}:`, error);
         return DEFAULT_AVATAR;
@@ -741,7 +743,7 @@ async function getKick7TVEmotes(userId) {
     }
 
     const userEmojis = await userSet.json();
-    
+
     const gettingAllKick7TVEmotes = userEmojis?.emote_set?.emotes?.map(emote => ({
         name: emote.name,
         id: emote.id,
@@ -750,7 +752,7 @@ async function getKick7TVEmotes(userId) {
 
     const globalSet = await fetch(`https://7tv.io/v3/emote-sets/global`);
     const globalEmojis = await globalSet.json();
-    
+
     const gettingAllGlobal7TVEmotes = globalEmojis?.emotes?.map(emote => ({
         name: emote.name,
         id: emote.id,
@@ -758,7 +760,7 @@ async function getKick7TVEmotes(userId) {
     })) || [];
 
     const SevenTVEmotesFusion = [...gettingAllKick7TVEmotes, ...gettingAllGlobal7TVEmotes];
-    
+
     if (SevenTVEmotesFusion != null) {
         console.debug("[Kick] Getting all Kick's user 7TV Emojis + Globals", SevenTVEmotesFusion);
 
@@ -770,10 +772,10 @@ async function getKick7TVEmotes(userId) {
 
 async function getKickBadges(badges) {
     const badgesArray = [];
-    
+
     badges.forEach(badge => {
         if (badge.type === 'subscriber') {
-            
+
             const targetMonths = badge.count;
 
             // Sort badges by months 

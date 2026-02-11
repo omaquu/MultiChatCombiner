@@ -2,29 +2,29 @@
 /* TIKTOK MODULE VARIABLES */
 /* ----------------------- */
 
-const showTiktok                    = getURLParam("showTiktok", false);
+const showTiktok = getURLParam("showTiktok", false);
 
-const showTikTokMessages            = getURLParam("showTikTokMessages", true);
-const showTikTokJoins               = getURLParam("showTikTokJoins", false);
-const showTikTokFollows             = getURLParam("showTikTokFollows", true);
-const showTikTokLikes               = getURLParam("showTikTokLikes", false);
-const showTikTokShares              = getURLParam("showTikTokShares", false);
-const showTikTokGifts               = getURLParam("showTikTokGifts", true);
-const showSmallTikTokGifts          = getURLParam("showSmallTikTokGifts", false);
-const showTikTokSubs                = getURLParam("showTikTokSubs", true);
-const showTikTokStatistics          = getURLParam("showTikTokStatistics", true);
+const showTikTokMessages = getURLParam("showTikTokMessages", true);
+const showTikTokJoins = getURLParam("showTikTokJoins", false);
+const showTikTokFollows = getURLParam("showTikTokFollows", true);
+const showTikTokLikes = getURLParam("showTikTokLikes", false);
+const showTikTokShares = getURLParam("showTikTokShares", false);
+const showTikTokGifts = getURLParam("showTikTokGifts", true);
+const showSmallTikTokGifts = getURLParam("showSmallTikTokGifts", false);
+const showTikTokSubs = getURLParam("showTikTokSubs", true);
+const showTikTokStatistics = getURLParam("showTikTokStatistics", true);
 
 const tiktokGiftsClasses = [
-    { min: 1,  max: 9, class: 'normal-gift' },
-    { min: 10,  max: 49, class: 'bigger-than-10' },
-    { min: 50,  max: 99, class: 'bigger-than-50' },
-    { min: 100,  max: 499, class: 'bigger-than-100' },
-    { min: 500,  max: 999, class: 'bigger-than-500' },
-    { min: 1000,  max: 4999, class: 'bigger-than-1000' },
-    { min: 5000,  max: 9999, class: 'bigger-than-5000' },
-    { min: 10000,  max: 49999, class: 'bigger-than-10000' },
-    { min: 50000,  max: 99999, class: 'bigger-than-50000' },
-    { min: 100000,  max: 99999999999, class: 'bigger-than-100000' },
+    { min: 1, max: 9, class: 'normal-gift' },
+    { min: 10, max: 49, class: 'bigger-than-10' },
+    { min: 50, max: 99, class: 'bigger-than-50' },
+    { min: 100, max: 499, class: 'bigger-than-100' },
+    { min: 500, max: 999, class: 'bigger-than-500' },
+    { min: 1000, max: 4999, class: 'bigger-than-1000' },
+    { min: 5000, max: 9999, class: 'bigger-than-5000' },
+    { min: 10000, max: 49999, class: 'bigger-than-10000' },
+    { min: 50000, max: 99999, class: 'bigger-than-50000' },
+    { min: 100000, max: 99999999999, class: 'bigger-than-100000' },
 ];
 
 userColors.set('tiktok', new Map());
@@ -42,9 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#statistics').insertAdjacentHTML('beforeend', tiktokStatistics);
 
         if (showTikTokStatistics == true) { document.querySelector('#statistics #tiktok').style.display = ''; }
-        
+
         console.debug('[TikTok][Debug] DOMContentLoaded fired');
-        
+
         tiktokConnection();
     }
 });
@@ -84,10 +84,10 @@ async function tiktokConnection() {
             console.debug(`[TikTok] ${data.event}`, data.data);
 
             switch (data.event) {
-                case 'roomUser' : tiktokUpdateStatistics(tiktokData, 'viewers'); break;
+                case 'roomUser': tiktokUpdateStatistics(tiktokData, 'viewers'); break;
                 case 'like': tiktokLikesMessage(tiktokData); tiktokUpdateStatistics(tiktokData, 'likes'); break;
-                case 'member' : tiktokJoinMessage(tiktokData); break;
-                case 'share' : tiktokShareMessage(tiktokData); break;
+                case 'member': tiktokJoinMessage(tiktokData); break;
+                case 'share': tiktokShareMessage(tiktokData); break;
                 case 'chat': tiktokChatMessage(tiktokData); break;
                 case 'follow': tiktokFollowMessage(tiktokData); break;
                 case 'gift': tiktokGiftMessage(tiktokData); break;
@@ -98,8 +98,8 @@ async function tiktokConnection() {
         tikfinityWebSocket.onclose = (event) => {
 
             setTimeout(() => {
-                    connect();
-                }, reconnectDelay);
+                connect();
+            }, reconnectDelay);
 
 
             /*console.error(`[TikFinity] Disconnected (code: ${event.code})`);
@@ -157,22 +157,22 @@ async function tiktokConnection() {
 // TIKTOK UTILITY FUNCTIONS
 
 async function tiktokChatMessage(data) {
-    
+
     if (!data?.comment) { data.comment = " "; }
     if (showTikTokMessages == false) return;
     //if (ignoreUserList.includes(data.nickname.toLowerCase())) return;
     if (ignoreUserList.includes(data.uniqueId.toLowerCase())) return;
     if (data.comment.startsWith("!") && excludeCommands == true) return;
 
-	const template = chatTemplate;
-	const clone = template.content.cloneNode(true);
+    const template = chatTemplate;
+    const clone = template.content.cloneNode(true);
     const messageId = data.msgId;
     const userId = data.userId;
 
     const {
         'first-message': firstMessage,
         'shared-chat': sharedChat,
-        
+
         header,
         timestamp,
         platform,
@@ -180,7 +180,7 @@ async function tiktokChatMessage(data) {
         avatar,
         pronouns: pronoun,
         user,
-        
+
         reply,
         'actual-message': message
     } = Object.fromEntries(
@@ -193,7 +193,7 @@ async function tiktokChatMessage(data) {
     if (data.isModerator) classes.push('mod');
     if (data.isSubscriber) classes.push('sub');
 
-    const [avatarImage,  badgesHTML] = await Promise.all([
+    const [avatarImage, badgesHTML] = await Promise.all([
         getTikTokAvatar(data),
         getTikTokBadges(data),
     ]);
@@ -206,22 +206,24 @@ async function tiktokChatMessage(data) {
     pronoun.remove();
 
     if (showAvatar) avatar.innerHTML = `<img src="${avatarImage}">`; else avatar.remove();
-    
+
     if (showBadges) {
         if (!badgesHTML) { badges.remove(); }
         else { badges.innerHTML = badgesHTML; }
-     }
+    }
     else { badges.remove(); }
 
     var color = await createRandomColor('tiktok', data.uniqueId);
 
     user.style.color = color;
     user.textContent = data.nickname;
-    
-    message.textContent = data.comment;
-    await getTikTokEmotes(data, message),
 
-    addMessageItem('tiktok', clone, classes, userId, messageId);
+    message.textContent = data.comment;
+    await getTikTokEmotes(data, message);
+
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, data, 'tiktok');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, data, 'tiktok');
+    addMessageItem('tiktok', clone, classes, userId, messageId, canEmbedImages, canEmbedYouTube);
 }
 
 
@@ -231,7 +233,7 @@ async function tiktokFollowMessage(data) {
     if (showTikTokFollows == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.msgId;
     const userId = data.userId;
 
@@ -253,7 +255,7 @@ async function tiktokFollowMessage(data) {
     message.remove();
     value.remove();
 
-    
+
     user.textContent = data.nickname;
 
     action.innerHTML = ` followed you`;
@@ -267,7 +269,7 @@ async function tiktokShareMessage(data) {
     if (showTikTokShares == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.msgId;
     const userId = data.userId;
 
@@ -289,7 +291,7 @@ async function tiktokShareMessage(data) {
     message.remove();
     value.remove();
 
-    
+
     user.textContent = data.nickname;
 
     action.innerHTML = ` shared the stream ↪️`;
@@ -299,7 +301,7 @@ async function tiktokShareMessage(data) {
 
 
 async function tiktokJoinMessage(data) {
-    
+
     if (showTikTokJoins == false) return;
 
     function onIdle() {
@@ -318,7 +320,7 @@ async function tiktokJoinMessage(data) {
 
     if (joinElement) {
         const messageElement = joinElement.querySelector('.message');
-        
+
         messageElement.classList.remove('animate__animated', 'animate__faster');
 
         if (chatHorizontal == true) {
@@ -339,7 +341,7 @@ async function tiktokJoinMessage(data) {
         else {
             messageElement.classList.add('animate__fadeInUp');
         }
-        
+
         chatContainer.prepend(joinElement);
     }
 
@@ -380,7 +382,7 @@ async function tiktokLikesMessage(data) {
     if (showTikTokLikes == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.msgId;
     const userId = data.userId;
 
@@ -399,7 +401,7 @@ async function tiktokLikesMessage(data) {
     const classes = ['tiktok', 'likes'];
 
     var likeCountTotal = parseInt(data.likeCount);
-    
+
     // Search for Previous Likes from the Same User
     const previousLikeContainer = chatContainer.querySelector(`div.event.tiktok.likes[data-user="${data.userId}"]`);
 
@@ -419,7 +421,7 @@ async function tiktokLikesMessage(data) {
     else {
 
         header.remove();
-        
+
         user.textContent = data.nickname;
         action.innerHTML = ` sent you `;
 
@@ -440,7 +442,7 @@ async function tiktokSubMessage(data) {
     if (showTikTokSubs == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.msgId;
     const userId = data.userId;
 
@@ -462,7 +464,7 @@ async function tiktokSubMessage(data) {
 
     user.textContent = data.nickname;
     action.innerHTML = ` subscribed for `;
-    
+
     //var months = data.subMonth > 1 ? 'months' : 'month';
     var months = formatSubMonthDuration(data.subMonth);
     value.innerHTML = `<strong>${months}</strong>`;
@@ -480,7 +482,7 @@ async function tiktokGiftMessage(data) {
     if (data.giftType === 1 && !data.repeatEnd) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.msgId;
     const userId = data.userId;
 
@@ -502,7 +504,7 @@ async function tiktokGiftMessage(data) {
 
     header.remove();
 
-    let coins = Math.floor(data.repeatCount*data.diamondCount);
+    let coins = Math.floor(data.repeatCount * data.diamondCount);
 
     const tikTokGiftMatch = tiktokGiftsClasses.find(lv => coins >= lv.min && coins <= lv.max);
     classes.push(tikTokGiftMatch.class);
@@ -576,7 +578,7 @@ async function getTikTokAvatar(data) {
     const {
         profilePictureUrl
     } = data;
-    
+
     return profilePictureUrl;
 }
 
@@ -587,10 +589,10 @@ async function getTikTokBadges(data) {
         //isSubscriber && '<span class="badge sub"><i class="fa-solid fa-star"></i></span>',
         isModerator && '<span class="badge mod"><i class="fa-solid fa-user-gear"></i></span>',
     ];
-    
+
     const badgesLevelEight = [
-        { min: 1,  max: 4,  url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv1_v1.png~tplv-obj.image' },
-        { min: 5,  max: 9,  url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv5_v1.png~tplv-obj.image' },
+        { min: 1, max: 4, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv1_v1.png~tplv-obj.image' },
+        { min: 5, max: 9, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv5_v1.png~tplv-obj.image' },
         { min: 10, max: 14, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv10_v1.png~tplv-obj.image' },
         { min: 15, max: 19, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv15_v2.png~tplv-obj.image' },
         { min: 20, max: 24, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/grade_badge_icon_lite_lv20_v1.png~tplv-obj.image' },
@@ -603,8 +605,8 @@ async function getTikTokBadges(data) {
     ];
 
     const badgesLevelTen = [
-        { min: 1,  max: 9,  url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv1_v4.png~tplv-obj.image' },
-        { min: 10, max: 19,  url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv10_v4.png~tplv-obj.image' },
+        { min: 1, max: 9, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv1_v4.png~tplv-obj.image' },
+        { min: 10, max: 19, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv10_v4.png~tplv-obj.image' },
         { min: 20, max: 29, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv20_v4.png~tplv-obj.image' },
         { min: 30, max: 39, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv30_v4.png~tplv-obj.image' },
         { min: 40, max: 49, url: 'https://p16-webcast.tiktokcdn.com/webcast-va/fans_badge_icon_lv40_v4.png~tplv-obj.image' },
@@ -662,7 +664,7 @@ async function getTikTokBadges(data) {
 
 
 async function tiktokUpdateStatistics(data, type) {
-    
+
     if (showPlatformStatistics == false || showTikTokStatistics == false) return;
 
     if (type == 'viewers') {
@@ -674,7 +676,7 @@ async function tiktokUpdateStatistics(data, type) {
         const likes = formatNumber(DOMPurify.sanitize(data.totalLikeCount)) || "0";
         document.querySelector('#statistics #tiktok .likes span').textContent = likes;
     }
-    
+
 }
 
 

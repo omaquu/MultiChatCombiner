@@ -258,6 +258,16 @@
                             </div>
 
                             <div class="config">
+                                <label>
+                                    Chat Order<br><small>Reverses the chat direction.</small>
+                                </label>
+                                <select name="chatOrder">
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="reverse">Reverse</option>
+                                </select>
+                            </div>
+
+                            <div class="config">
                                 <label>Platforms<br><small>Shows the platforms logos.</small></label>
                                 <label class="switch"><input type="checkbox" name="showPlatform" checked><span
                                         class="slider"></span></label>
@@ -328,6 +338,19 @@
                             </div>
 
                             <div class="config">
+                                <label>
+                                    Embed Permission<br><small>Who can embed images?</small>
+                                </label>
+                                <select name="imageEmbedPermissionLevel">
+                                    <option value="10">Everyone</option>
+                                    <option value="15">Subscriber</option>
+                                    <option value="20" selected>VIP</option>
+                                    <option value="30">Moderator</option>
+                                    <option value="40">Broadcaster</option>
+                                </select>
+                            </div>
+
+                            <div class="config">
                                 <label>Chat Bubbles<br><small>Wraps messages in a bubble style.</small></label>
                                 <label class="switch"><input type="checkbox" name="chatBubbles"><span
                                         class="slider"></span></label>
@@ -338,6 +361,19 @@
                                 <label>Embed YouTube<br><small>Embeds YouTube videos from links.</small></label>
                                 <label class="switch"><input type="checkbox" name="embedYouTube"><span
                                         class="slider"></span></label>
+                            </div>
+
+                            <div class="config">
+                                <label>
+                                    YouTube Permission<br><small>Who can embed YouTube videos?</small>
+                                </label>
+                                <select name="youTubeEmbedPermissionLevel">
+                                    <option value="10">Everyone</option>
+                                    <option value="15">Subscriber</option>
+                                    <option value="20" selected>VIP</option>
+                                    <option value="30">Moderator</option>
+                                    <option value="40">Broadcaster</option>
+                                </select>
                             </div>
 
                             <div class="config">
@@ -436,33 +472,6 @@
                                     style="padding: 10px 20px; background: #a970ff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
                                     <i class="fa-solid fa-paper-plane"></i> Send Test Message
                                 </button>
-                            </div>
-
-                            <hr>
-
-                            <div class="config">
-                                <label>Chat Direction<br><small>New messages appear at...</small></label>
-                                <select name="chatDirection">
-                                    <option value="bottom" selected>Bottom</option>
-                                    <option value="top">Top</option>
-                                </select>
-                            </div>
-
-                            <hr>
-
-                            <div class="config">
-                                <label style="text-align: left; width: 100%;"><strong>Embed Permissions</strong></label>
-                            </div>
-                            <div class="config">
-                                <label>Who can embed media?</label>
-                                <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
-                                    <label><input type="checkbox" name="embedPermsBroadcaster" checked>
-                                        Broadcaster</label>
-                                    <label><input type="checkbox" name="embedPermsMod" checked> Moderators</label>
-                                    <label><input type="checkbox" name="embedPermsVip" checked> VIPs</label>
-                                    <label><input type="checkbox" name="embedPermsSub"> Subscribers</label>
-                                    <label><input type="checkbox" name="embedPermsEveryone"> Everyone</label>
-                                </div>
                             </div>
 
                             <hr>

@@ -2,15 +2,15 @@
 /* YOUTUBE MODULE VARIABLES */
 /* ------------------------ */
 
-const showYoutube                       = getURLParam("showYoutube", false);
-const showYouTubeMessages               = getURLParam("showYouTubeMessages", true);
-const showYouTubeSuperChats             = getURLParam("showYouTubeSuperChats", true);
-const showYouTubeSuperStickers          = getURLParam("showYouTubeSuperStickers", true);
-const showYouTubeSuperStickerGif        = getURLParam("showYouTubeSuperStickerGif", true);
-const showYouTubeMemberships            = getURLParam("showYouTubeMemberships", true);
-const showYouTubeGiftMemberships        = getURLParam("showYouTubeGiftMemberships", true);
-const showYouTubeMembershipsTrain       = getURLParam("showYouTubeMembershipsTrain", true);
-const showYouTubeStatistics             = getURLParam("showYouTubeStatistics", true);
+const showYoutube = getURLParam("showYoutube", false);
+const showYouTubeMessages = getURLParam("showYouTubeMessages", true);
+const showYouTubeSuperChats = getURLParam("showYouTubeSuperChats", true);
+const showYouTubeSuperStickers = getURLParam("showYouTubeSuperStickers", true);
+const showYouTubeSuperStickerGif = getURLParam("showYouTubeSuperStickerGif", true);
+const showYouTubeMemberships = getURLParam("showYouTubeMemberships", true);
+const showYouTubeGiftMemberships = getURLParam("showYouTubeGiftMemberships", true);
+const showYouTubeMembershipsTrain = getURLParam("showYouTubeMembershipsTrain", true);
+const showYouTubeStatistics = getURLParam("showYouTubeStatistics", true);
 
 let youTubeCustomEmotes = [];
 let youTubeBTTVEmotes = [];
@@ -77,13 +77,13 @@ if (showYoutube) {
 // YOUTUBE EVENT FUNCTIONS
 
 async function youTubeChatMessage(data) {
-    
+
     if (showYouTubeMessages == false) return;
     if (ignoreUserList.includes(data.user.name.toLowerCase())) return;
     if (data.message.startsWith("!") && excludeCommands == true) return;
 
-	const template = chatTemplate;
-	const clone = template.content.cloneNode(true);
+    const template = chatTemplate;
+    const clone = template.content.cloneNode(true);
     const messageId = data.eventId;
     const userId = data.user.id;
     const broadcastId = data.broadcast.id;
@@ -94,7 +94,7 @@ async function youTubeChatMessage(data) {
     const {
         'first-message': firstMessage,
         'shared-chat': sharedChat,
-        
+
         header,
         timestamp,
         platform,
@@ -102,7 +102,7 @@ async function youTubeChatMessage(data) {
         avatar,
         pronouns: pronoun,
         user,
-        
+
         reply,
         'actual-message': message
     } = Object.fromEntries(
@@ -134,7 +134,7 @@ async function youTubeChatMessage(data) {
     user.style.color = color;
     user.textContent = data.user.name;
 
-    
+
     message.textContent = data.message;
     await getYouTubeEmotes(data, message);
 
@@ -143,7 +143,9 @@ async function youTubeChatMessage(data) {
 
     if (data.user.isOwner) { classes.push('streamer'); }
 
-    addMessageItem('youtube', clone, classes, userId, messageId);
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, data, 'youtube');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, data, 'youtube');
+    addMessageItem('youtube', clone, classes, userId, messageId, canEmbedImages, canEmbedYouTube);
 }
 
 
@@ -154,7 +156,7 @@ async function youTubeSuperChatMessage(data) {
     if (showYouTubeSuperChats == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.eventId;
     const userId = data.user.id;
 
@@ -181,7 +183,7 @@ async function youTubeSuperChatMessage(data) {
 
     header.remove();
 
-    
+
     user.textContent = data.user.name;
     action.innerHTML = ` superchatted `;
     value.innerHTML = `<strong>${data.amount}</strong>`;
@@ -195,11 +197,11 @@ async function youTubeSuperChatMessage(data) {
 
 
 async function youTubeSuperStickerMessage(data) {
-    
+
     if (showYouTubeMemberships == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.eventId;
     const userId = data.user.id;
 
@@ -231,12 +233,12 @@ async function youTubeSuperStickerMessage(data) {
     else {
         header.remove();
     }
-    
+
     user.textContent = data.user.name;
     action.innerHTML = ` sent a supersticker `;
 
     value.innerHTML = `<strong>(${data.amount})</strong>`;
-    
+
     message.remove();
 
     addEventItem('youtube', clone, classes, userId, messageId);
@@ -245,11 +247,11 @@ async function youTubeSuperStickerMessage(data) {
 
 
 async function youTubeNewSponsorMessage(data) {
-    
+
     if (showYouTubeMemberships == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.eventId;
     const userId = data.user.id;
 
@@ -276,7 +278,7 @@ async function youTubeNewSponsorMessage(data) {
 
     header.remove();
 
-    
+
     user.textContent = data.user.name;
     action.innerHTML = ` became a member for `;
 
@@ -296,11 +298,11 @@ async function youTubeNewSponsorMessage(data) {
 
 
 async function youTubeGiftBombMessage(data) {
-    
+
     if (showYouTubeMemberships == false || showYouTubeGiftMemberships == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.eventId;
     const userId = data.user.id;
 
@@ -327,7 +329,7 @@ async function youTubeGiftBombMessage(data) {
 
     header.remove();
 
-    
+
     user.textContent = data.user.name;
     action.innerHTML = ` gifted `;
 
@@ -342,11 +344,11 @@ async function youTubeGiftBombMessage(data) {
 
 
 async function youTubeGiftBombReceivedMessage(data) {
-    
+
     if (showYouTubeMemberships == false || showYouTubeGiftMemberships == false || showYouTubeMembershipsTrain == false) return;
 
     const template = eventTemplate;
-	const clone = template.content.cloneNode(true);
+    const clone = template.content.cloneNode(true);
     const messageId = data.eventId;
     const userId = data.user.id;
 
@@ -373,7 +375,7 @@ async function youTubeGiftBombReceivedMessage(data) {
 
     header.remove();
 
-    
+
     user.textContent = data.gifter.name;
     action.innerHTML = ` gifted a membership to `;
     value.innerHTML = `<strong>${escapeHTML(data.user.name)}</strong>`;
@@ -394,9 +396,9 @@ async function youTubeUserBanned(data) {
 
 
 async function youTubeAddStatistics(data) {
-    
+
     if (showPlatformStatistics == false || showYouTubeStatistics == false) return;
-    
+
     const status = data.status;
     const id = data.id;
     const title = data.title;
@@ -409,9 +411,9 @@ async function youTubeAddStatistics(data) {
         const original = document.querySelector('#statistics #youtube');
         if (original) original.remove();
 
-        if (!document.querySelector( `#${elementId}` )) {
+        if (!document.querySelector(`#${elementId}`)) {
             let youtubeStatisticsHTML = youtubeStatistics.replace(`id="youtube"`, `id="${elementId}"`);
-            
+
             const verticalTags = ["vertical", "shorts"];
             const isVertical = tags.some(item =>
                 verticalTags.some(target => item.toLowerCase() === target.toLowerCase())
@@ -425,10 +427,10 @@ async function youTubeAddStatistics(data) {
 
             const streamelement = document.querySelector(`#${elementId}`);
             const streamtitle = streamelement.querySelector(`#${elementId} .title`);
-            
+
             streamtitle.textContent = title;
             streamelement.setAttribute('title', title);
-            
+
             if (showYouTubeStatistics == true) {
                 for (const el of document.querySelectorAll('.youtube')) {
                     el.style.display = '';
@@ -449,15 +451,15 @@ async function youTubeAddStatistics(data) {
             document.querySelector('#statistics').insertAdjacentHTML('beforeend', youtubeStatistics);
             document.querySelector('#youtube').style.display = '';
         }
-        
+
     }
 }
 
 
 async function youTubeUpdateStatistics(data) {
-    
+
     if (showPlatformStatistics == false || showYouTubeStatistics == false) return;
-    
+
     const id = data.broadcast.id;
     const viewers = formatNumber(DOMPurify.sanitize(data.concurrentViewers)) || "0";
     const likes = formatNumber(DOMPurify.sanitize(data.likeCount)) || "0";
@@ -476,7 +478,7 @@ async function youTubeUpdateStatistics(data) {
 
 
 
-        
+
 
 
 

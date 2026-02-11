@@ -84,22 +84,10 @@ body {
 #chat {
     flex: 1;
     display: flex;
-    /* Default fallback */
     flex-direction: column-reverse;
     overflow-y: auto;
-    padding: 10px 10px 30px 10px;
-    /* Top Right Bottom Left */
+    padding: 0px 10px;
     scrollbar-color: #555 #1e1e1e;
-}
-
-#chat.direction-bottom {
-    flex-direction: column-reverse;
-    justify-content: flex-end;
-}
-
-#chat.direction-top {
-    flex-direction: column;
-    justify-content: flex-start;
 }
 
 #chat.noscrollbar {

@@ -4,15 +4,15 @@
 
 let speakerBotClient = null;
 
-const streamerBotServerAddress = getURLParam("streamerBotServerAddress", "127.0.0.1");
-const streamerBotServerPort = getURLParam("streamerBotServerPort", "8080");
-const showSpeakerbot = getURLParam("showSpeakerbot", true);
-const speakerBotServerAddress = getURLParam("speakerBotServerAddress", "127.0.0.1");
-const speakerBotServerPort = getURLParam("speakerBotServerPort", "7580");
-const speakerBotChatRead = getURLParam("speakerBotChatRead", false);
-const speakerBotEventRead = getURLParam("speakerBotEventRead", false);
-const speakerBotVoiceAlias = getURLParam("speakerBotVoiceAlias", "Maria");
-const speakerBotChatTemplate = getURLParam("speakerBotChatTemplate", "{user} said {message}");
+const streamerBotServerAddress      = getURLParam("streamerBotServerAddress", "127.0.0.1");
+const streamerBotServerPort         = getURLParam("streamerBotServerPort", "8080");
+const showSpeakerbot                = getURLParam("showSpeakerbot", true);
+const speakerBotServerAddress       = getURLParam("speakerBotServerAddress", "127.0.0.1");
+const speakerBotServerPort          = getURLParam("speakerBotServerPort", "7580");
+const speakerBotChatRead            = getURLParam("speakerBotChatRead", false);
+const speakerBotEventRead           = getURLParam("speakerBotEventRead", false);
+const speakerBotVoiceAlias          = getURLParam("speakerBotVoiceAlias", "Maria");
+const speakerBotChatTemplate        = getURLParam("speakerBotChatTemplate", "{user} said {message}");
 
 function getSpeakerBotInstance() {
     if (!speakerBotClient && showSpeakerbot) {
@@ -90,44 +90,4 @@ function registerPlatformHandlersToStreamerBot(handlers, logPrefix = '') {
             handler(...args);
         });
     }
-}
-
-function notifySuccess(data) {
-    new Notify({
-        status: 'success',
-        title: data.title,
-        text: data.text,
-        effect: 'fade',
-        speed: 300,
-        customClass: '',
-        customIcon: '',
-        showIcon: true,
-        showCloseButton: true,
-        autoclose: true,
-        autotimeout: 3000,
-        gap: 20,
-        distance: 20,
-        type: 1,
-        position: 'right top'
-    });
-}
-
-function notifyError(data) {
-    new Notify({
-        status: 'error',
-        title: data.title,
-        text: data.text,
-        effect: 'fade',
-        speed: 300,
-        customClass: '',
-        customIcon: '',
-        showIcon: true,
-        showCloseButton: true,
-        autoclose: true,
-        autotimeout: 3000,
-        gap: 20,
-        distance: 20,
-        type: 1,
-        position: 'right top'
-    });
 }

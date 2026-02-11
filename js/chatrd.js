@@ -36,43 +36,6 @@ const embedYouTube = getURLParam("embedYouTube", false);
 const chatBubbles = getURLParam("chatBubbles", false);
 const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
 
-// Chat Direction
-let chatDirection = getURLParam("chatDirection", "bottom"); // 'bottom' or 'top'
-
-// Embed Permissions
-let embedPermsBroadcaster = getURLParam("embedPermsBroadcaster", true);
-let embedPermsMod = getURLParam("embedPermsMod", true);
-let embedPermsVip = getURLParam("embedPermsVip", true);
-let embedPermsSub = getURLParam("embedPermsSub", false);
-let embedPermsEveryone = getURLParam("embedPermsEveryone", false);
-
-function checkEmbedPermission(badges) {
-    if (embedPermsEveryone) return true;
-
-    let isBroadcaster = false;
-    let isMod = false;
-    let isVip = false;
-    let isSub = false;
-
-    if (badges) {
-        badges.forEach(b => {
-            const name = (b.name || "").toLowerCase();
-            const id = (b.id || "").toLowerCase(); // Check ID too just in case
-            if (name === "broadcaster" || id === "broadcaster") isBroadcaster = true;
-            if (name === "moderator" || id === "moderator") isMod = true;
-            if (name === "vip" || id === "vip") isVip = true;
-            if (name === "subscriber" || id === "subscriber" || name === "founder" || id === "founder") isSub = true;
-        });
-    }
-
-    if (embedPermsBroadcaster && isBroadcaster) return true;
-    if (embedPermsMod && isMod) return true;
-    if (embedPermsVip && isVip) return true;
-    if (embedPermsSub && isSub) return true;
-
-    return false;
-}
-
 // Advanced Visuals Params
 const chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
 const chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
@@ -81,6 +44,10 @@ const chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
 const chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
 const chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
 const chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
+
+const imageEmbedPermissionLevel = getURLParam("imageEmbedPermissionLevel", 10);
+const youTubeEmbedPermissionLevel = getURLParam("youTubeEmbedPermissionLevel", 10);
+const chatOrder = getURLParam("chatOrder", "normal");
 
 // Text Effects Params
 let chatMessageStrokeColor = getURLParam("chatMessageStrokeColor", "#000000");
@@ -91,7 +58,7 @@ let chatMessageGlowColor = getURLParam("chatMessageGlowColor", "#ffffff");
 let chatMessageGlowSpread = getURLParam("chatMessageGlowSpread", 0);
 let chatMessageWatery = getURLParam("chatMessageWatery", false);
 
-
+const chatContainer = document.querySelector('#chat');
 
 const chatTemplate = document.querySelector('#chat-message');
 const eventTemplate = document.querySelector('#event-message');
@@ -125,6 +92,11 @@ if (chatHorizontal == true) {
     chatContainer.classList.add('horizontal');
 }
 
+if (chatOrder === "reverse") {
+    // Override CSS to column instead of column-reverse
+    chatContainer.style.flexDirection = "column";
+}
+
 let backgroundColor = hexToRGBA(chatBackground, chatBackgroundOpacity);
 chatContainer.parentElement.style.backgroundColor = backgroundColor;
 
@@ -136,7 +108,7 @@ if (chatField) {
 }
 
 
-function addMessageItem(platform, clone, classes, userid, messageid) {
+function addMessageItem(platform, clone, classes, userid, messageid, canEmbedImages = true, canEmbedYouTube = true) {
     removeExtraChatMessages();
 
     let chatmodtwitch = `<div class="chatmoderation">
@@ -161,10 +133,8 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     root.classList.add(...classes);
     root.dataset.user = userid;
     root.id = messageid;
+    root.id = messageid;
     root.style.opacity = '0';
-
-    const messageEl = clone.querySelector('.actual-message');
-    const infoEl = clone.querySelector('.info');
 
     // Apply Text Effects (Independent of Bubbles)
     root.style.setProperty('--text-stroke-color', chatMessageStrokeColor);
@@ -200,24 +170,15 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         root.style.setProperty('--bubble-glow-blur', `${chatBubbleGlowSpread}px`);
     }
 
-    // Determine permissions
-    const userRoles = [];
-    if (classes.includes('broadcaster') || classes.includes('owner')) userRoles.push({ name: 'broadcaster' });
-    if (classes.includes('moderator')) userRoles.push({ name: 'moderator' });
-    if (classes.includes('vip')) userRoles.push({ name: 'vip' });
-    if (classes.includes('subscriber')) userRoles.push({ name: 'subscriber' });
-
-    // Attempt to parse badges from clone if classes aren't sufficient? 
-    // Classes are reliable enough for Streamer.bot usually.
-
-    const canEmbed = checkEmbedPermission(userRoles);
+    const messageEl = clone.querySelector('.actual-message');
+    const infoEl = clone.querySelector('.info');
 
     getAndReplaceLinks(messageEl).then(() => {
         multiStreamChat(messageEl);
         const messageContent = messageEl.innerText.trim();
 
         /* Embed Images */
-        if (embedImages && canEmbed) {
+        if (embedImages && canEmbedImages) {
             if (isImageUrl(messageContent)) {
                 const image = new Image();
                 image.onload = function () {
@@ -232,7 +193,7 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
         }
 
         /* Embed YouTube */
-        if (embedYouTube && canEmbed) {
+        if (embedYouTube && canEmbedYouTube) {
             const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
             const match = messageContent.match(ytRegex);
             if (match && match[1]) {
@@ -260,23 +221,6 @@ function addMessageItem(platform, clone, classes, userid, messageid) {
     });
 
     const platformElement = clone.querySelector('.platform');
-
-    // Apply Chat Direction Class
-    if (chatDirection === "top") {
-        chatContainer.classList.add('direction-top');
-        chatContainer.classList.remove('direction-bottom');
-    } else {
-        chatContainer.classList.add('direction-bottom');
-        chatContainer.classList.remove('direction-top');
-    }
-
-    // Move opacity fade-in to here so it happens after append/prepend
-    const inserted = document.getElementById(messageid);
-    if (inserted) {
-        // Force reflow
-        void inserted.offsetWidth;
-        inserted.style.opacity = '1';
-    }
 
     if (showPlatform == true) {
         let platformContent;
@@ -1099,65 +1043,9 @@ async function getAndReplaceLinks(el) {
 }
 
 
-/* Listen for Live Updates */
-window.addEventListener('message', (event) => {
-    if (event.data.type === 'updateSettings') {
-        const s = event.data.settings;
-
-        // Update variables
-        if (s.chatBubbles !== undefined) chatBubbles = (s.chatBubbles === 'true' || s.chatBubbles === true);
-        if (s.embedImages !== undefined) embedImages = (s.embedImages === 'true' || s.embedImages === true);
-        if (s.embedYouTube !== undefined) embedYouTube = (s.embedYouTube === 'true' || s.embedYouTube === true);
-        if (s.chatBubbleAnimation !== undefined) chatBubbleAnimation = s.chatBubbleAnimation;
-
-        // Update Embed Perms
-        if (s.embedPermsBroadcaster !== undefined) embedPermsBroadcaster = (s.embedPermsBroadcaster === 'true' || s.embedPermsBroadcaster === true);
-        if (s.embedPermsMod !== undefined) embedPermsMod = (s.embedPermsMod === 'true' || s.embedPermsMod === true);
-        if (s.embedPermsVip !== undefined) embedPermsVip = (s.embedPermsVip === 'true' || s.embedPermsVip === true);
-        if (s.embedPermsSub !== undefined) embedPermsSub = (s.embedPermsSub === 'true' || s.embedPermsSub === true);
-        if (s.embedPermsEveryone !== undefined) embedPermsEveryone = (s.embedPermsEveryone === 'true' || s.embedPermsEveryone === true);
-
-        // Update Chat Direction
-        if (s.chatDirection !== undefined) {
-            chatDirection = s.chatDirection;
-            if (chatDirection === "top") {
-                chatContainer.classList.add('direction-top');
-                chatContainer.classList.remove('direction-bottom');
-            } else {
-                chatContainer.classList.add('direction-bottom');
-                chatContainer.classList.remove('direction-top');
-            }
-        }
-    }
-});
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", function () {
     pushChatInputSettings();
     loadChatInputSettingFromLocalStorage();
-
-    // Test Message Button
-    const testBtn = document.getElementById('sendTestMessageBtn');
-    if (testBtn) {
-        testBtn.addEventListener('click', () => {
-            const platforms = ['twitch', 'youtube', 'kick', 'tiktok'];
-            const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-            const randomUser = "TestUser_" + Math.floor(Math.random() * 1000);
-
-            // Mock a message item
-            const clone = chatTemplate.content.cloneNode(true);
-            const classes = [randomPlatform, 'item', 'chat'];
-
-            // Populate Clone
-            clone.querySelector('.user').textContent = randomUser;
-            clone.querySelector('.actual-message').innerHTML = "This is a test message with effects! " + new Date().toLocaleTimeString();
-
-            // Random Badges?
-            const badges = clone.querySelector('.badges');
-            if (badges) badges.innerHTML = ''; // Clear for test
-
-            // Add
-            addMessageItem(randomPlatform, clone, classes, randomUser, "msg_" + Date.now());
-        });
-    }
 });
 
 
@@ -1255,25 +1143,6 @@ window.addEventListener('message', (event) => {
         if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
         if (s.chatMessageGlowSpread !== undefined) chatMessageGlowSpread = Number(s.chatMessageGlowSpread) || 0;
 
-        // Update Embed Perms
-        if (s.embedPermsBroadcaster !== undefined) embedPermsBroadcaster = (s.embedPermsBroadcaster === 'true' || s.embedPermsBroadcaster === true);
-        if (s.embedPermsMod !== undefined) embedPermsMod = (s.embedPermsMod === 'true' || s.embedPermsMod === true);
-        if (s.embedPermsVip !== undefined) embedPermsVip = (s.embedPermsVip === 'true' || s.embedPermsVip === true);
-        if (s.embedPermsSub !== undefined) embedPermsSub = (s.embedPermsSub === 'true' || s.embedPermsSub === true);
-        if (s.embedPermsEveryone !== undefined) embedPermsEveryone = (s.embedPermsEveryone === 'true' || s.embedPermsEveryone === true);
-
-        // Update Chat Direction
-        if (s.chatDirection !== undefined) {
-            chatDirection = s.chatDirection;
-            if (chatDirection === "top") {
-                chatContainer.classList.add('direction-top');
-                chatContainer.classList.remove('direction-bottom');
-            } else {
-                chatContainer.classList.add('direction-bottom');
-                chatContainer.classList.remove('direction-top');
-            }
-        }
-
         // Force update existing messages
         document.querySelectorAll('.item').forEach(root => {
             // Re-apply bubble class
@@ -1316,5 +1185,53 @@ window.addEventListener('message', (event) => {
             root.querySelector('.platform').innerHTML = '<img src="js/modules/twitch/images/logo-twitch.svg">';
             root.style.opacity = 1;
         }
+
     }
 });
+
+
+function IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(targetPermissions, data, platform) {
+    return GetPermissionLevel(data, platform) >= targetPermissions;
+}
+
+function GetPermissionLevel(data, platform) {
+    switch (platform) {
+        // Streamer.bot Twitch Data
+        case 'twitch':
+            // 4 = Broadcaster
+            if (data.user.role == 4) return 40;
+            // 3 = Moderator
+            else if (data.user.role == 3) return 30;
+            // 2 = VIP
+            else if (data.user.role == 2) return 20;
+
+            // 1 = Subscriber
+            if (data.user.role == 1 || data.message.subscriber) return 15;
+
+            return 10; // Everyone
+
+        case 'kick':
+            // data.sender.identity.badges is array of {type: 'broadcaster', text: 'Broadcaster', ...}
+            if (!data.sender || !data.sender.identity || !data.sender.identity.badges) return 10;
+            if (data.sender.identity.badges.some(item => item.type === 'broadcaster')) return 40;
+            if (data.sender.identity.badges.some(item => item.type === 'moderator')) return 30;
+            if (data.sender.identity.badges.some(item => item.type === 'vip') || data.sender.identity.badges.some(item => item.type === 'og')) return 20;
+            if (data.sender.identity.badges.some(item => item.type === 'subscriber')) return 15;
+            return 10;
+
+        case 'youtube':
+            // data.user.isOwner, isModerator, isSponsor
+            if (data.user.isOwner) return 40;
+            if (data.user.isModerator) return 30;
+            if (data.user.isSponsor) return 15;
+            return 10;
+
+        case 'tiktok':
+            if (data.isModerator) return 30;
+            if (data.isSubscriber) return 15;
+            return 10;
+
+        default:
+            return 10;
+    }
+}
