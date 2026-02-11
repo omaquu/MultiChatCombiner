@@ -31,22 +31,34 @@ const ignoreChatters = getURLParam("ignoreChatters", "");
 const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLowerCase()) || [];
 
 const hideAfter = getURLParam("hideAfter", 0);
-const embedImages = getURLParam("embedImages", false);
-const embedYouTube = getURLParam("embedYouTube", false);
-const chatBubbles = getURLParam("chatBubbles", false);
-const chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
+let embedImages = getURLParam("embedImages", false);
+let embedYouTube = getURLParam("embedYouTube", false);
+let chatBubbles = getURLParam("chatBubbles", false);
+let chatBubbleAnimation = getURLParam("chatBubbleAnimation", "none");
 
 // Advanced Visuals Params
-const chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
-const chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
-const chatBubbleBorderWidth = getURLParam("chatBubbleBorderWidth", 0);
-const chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
-const chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
-const chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
-const chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
+let chatBubbleGlass = getURLParam("chatBubbleGlass", 0);
+let chatBubbleBorderColor = getURLParam("chatBubbleBorderColor", "#ffffff");
+let chatBubbleBorderWidth = getURLParam("chatBubbleBorderWidth", 0);
+let chatBubbleShadowColor = getURLParam("chatBubbleShadowColor", "#000000");
+let chatBubbleShadowBlur = getURLParam("chatBubbleShadowBlur", 0);
+let chatBubbleGlowColor = getURLParam("chatBubbleGlowColor", "#ffffff");
+let chatBubbleGlowSpread = getURLParam("chatBubbleGlowSpread", 0);
 
-const imageEmbedPermissionLevel = getURLParam("imageEmbedPermissionLevel", 10);
-const youTubeEmbedPermissionLevel = getURLParam("youTubeEmbedPermissionLevel", 10);
+// Permission Params (Images)
+let permImagesEveryone = getURLParam("permImagesEveryone", false);
+let permImagesSub = getURLParam("permImagesSub", false);
+let permImagesVIP = getURLParam("permImagesVIP", true); // Default VIP check
+let permImagesMod = getURLParam("permImagesMod", true);
+let permImagesBroadcaster = getURLParam("permImagesBroadcaster", true);
+
+// Permission Params (YouTube)
+let permYouTubeEveryone = getURLParam("permYouTubeEveryone", false);
+let permYouTubeSub = getURLParam("permYouTubeSub", false);
+let permYouTubeVIP = getURLParam("permYouTubeVIP", true);
+let permYouTubeMod = getURLParam("permYouTubeMod", true);
+let permYouTubeBroadcaster = getURLParam("permYouTubeBroadcaster", true);
+
 const chatOrder = getURLParam("chatOrder", "normal");
 
 // Text Effects Params
@@ -1141,7 +1153,22 @@ window.addEventListener('message', (event) => {
         if (s.chatMessageShadowColor !== undefined) chatMessageShadowColor = s.chatMessageShadowColor;
         if (s.chatMessageShadowBlur !== undefined) chatMessageShadowBlur = Number(s.chatMessageShadowBlur) || 0;
         if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
+        if (s.chatMessageGlowColor !== undefined) chatMessageGlowColor = s.chatMessageGlowColor;
         if (s.chatMessageGlowSpread !== undefined) chatMessageGlowSpread = Number(s.chatMessageGlowSpread) || 0;
+
+        // Update Permissions
+        if (s.permImagesEveryone !== undefined) permImagesEveryone = (s.permImagesEveryone === 'true' || s.permImagesEveryone === true);
+        if (s.permImagesSub !== undefined) permImagesSub = (s.permImagesSub === 'true' || s.permImagesSub === true);
+        if (s.permImagesVIP !== undefined) permImagesVIP = (s.permImagesVIP === 'true' || s.permImagesVIP === true);
+        if (s.permImagesMod !== undefined) permImagesMod = (s.permImagesMod === 'true' || s.permImagesMod === true);
+        if (s.permImagesBroadcaster !== undefined) permImagesBroadcaster = (s.permImagesBroadcaster === 'true' || s.permImagesBroadcaster === true);
+
+        if (s.permYouTubeEveryone !== undefined) permYouTubeEveryone = (s.permYouTubeEveryone === 'true' || s.permYouTubeEveryone === true);
+        if (s.permYouTubeSub !== undefined) permYouTubeSub = (s.permYouTubeSub === 'true' || s.permYouTubeSub === true);
+        if (s.permYouTubeVIP !== undefined) permYouTubeVIP = (s.permYouTubeVIP === 'true' || s.permYouTubeVIP === true);
+        if (s.permYouTubeMod !== undefined) permYouTubeMod = (s.permYouTubeMod === 'true' || s.permYouTubeMod === true);
+        if (s.permYouTubeBroadcaster !== undefined) permYouTubeBroadcaster = (s.permYouTubeBroadcaster === 'true' || s.permYouTubeBroadcaster === true);
+
 
         // Force update existing messages
         document.querySelectorAll('.item').forEach(root => {
@@ -1190,8 +1217,28 @@ window.addEventListener('message', (event) => {
 });
 
 
-function IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(targetPermissions, data, platform) {
-    return GetPermissionLevel(data, platform) >= targetPermissions;
+function IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(type, data, platform) {
+    const level = GetPermissionLevel(data, platform);
+
+    // Everyone Override
+    if (type === 'images' && permImagesEveryone) return true;
+    if (type === 'youtube' && permYouTubeEveryone) return true;
+
+    // Specific Role Check
+    if (type === 'images') {
+        if (level === 40 && permImagesBroadcaster) return true; // Broadcaster
+        if (level === 30 && permImagesMod) return true;         // Moderator
+        if (level === 20 && permImagesVIP) return true;         // VIP
+        if (level === 15 && permImagesSub) return true;         // Subscriber
+    }
+    else if (type === 'youtube') {
+        if (level === 40 && permYouTubeBroadcaster) return true;
+        if (level === 30 && permYouTubeMod) return true;
+        if (level === 20 && permYouTubeVIP) return true;
+        if (level === 15 && permYouTubeSub) return true;
+    }
+
+    return false;
 }
 
 function GetPermissionLevel(data, platform) {

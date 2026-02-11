@@ -221,8 +221,8 @@ async function tiktokChatMessage(data) {
     message.textContent = data.comment;
     await getTikTokEmotes(data, message);
 
-    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, data, 'tiktok');
-    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, data, 'tiktok');
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('images', data, 'tiktok');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('youtube', data, 'tiktok');
     addMessageItem('tiktok', clone, classes, userId, messageId, canEmbedImages, canEmbedYouTube);
 }
 

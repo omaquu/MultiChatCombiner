@@ -255,8 +255,8 @@ async function twitchChatMessage(data) {
     message.textContent = streamData.message.message;
     await getTwitchEmotes(streamData, message);
 
-    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, streamData, 'twitch');
-    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, streamData, 'twitch');
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('images', streamData, 'twitch');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('youtube', streamData, 'twitch');
     addMessageItem('twitch', clone, classes, userId, messageId, canEmbedImages, canEmbedYouTube);
 }
 

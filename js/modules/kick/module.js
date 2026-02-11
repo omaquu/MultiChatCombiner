@@ -321,8 +321,8 @@ async function kickChatMessage(data) {
     sharedChat.remove();
     pronoun.remove();
 
-    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, data, 'kick');
-    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, data, 'kick');
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('images', data, 'kick');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('youtube', data, 'kick');
     addMessageItem('kick', clone, classes, userSlug, messageId, canEmbedImages, canEmbedYouTube);
 }
 

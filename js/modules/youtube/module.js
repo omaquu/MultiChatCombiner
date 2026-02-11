@@ -143,8 +143,8 @@ async function youTubeChatMessage(data) {
 
     if (data.user.isOwner) { classes.push('streamer'); }
 
-    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(imageEmbedPermissionLevel, data, 'youtube');
-    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot(youTubeEmbedPermissionLevel, data, 'youtube');
+    const canEmbedImages = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('images', data, 'youtube');
+    const canEmbedYouTube = IsThisUserAllowedToPostImagesOrNotReturnTrueIfTheyCanReturnFalseIfTheyCannot('youtube', data, 'youtube');
     addMessageItem('youtube', clone, classes, userId, messageId, canEmbedImages, canEmbedYouTube);
 }
 

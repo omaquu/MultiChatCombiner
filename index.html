@@ -337,17 +337,17 @@
                                         class="slider"></span></label>
                             </div>
 
-                            <div class="config">
+                            <div class="config" style="align-items: flex-start;">
                                 <label>
-                                    Embed Permission<br><small>Who can embed images?</small>
+                                    Embed Permission<br><small>Check roles that can embed images.</small>
                                 </label>
-                                <select name="imageEmbedPermissionLevel">
-                                    <option value="10">Everyone</option>
-                                    <option value="15">Subscriber</option>
-                                    <option value="20" selected>VIP</option>
-                                    <option value="30">Moderator</option>
-                                    <option value="40">Broadcaster</option>
-                                </select>
+                                <div style="display: flex; flex-direction: column; text-align: right;">
+                                    <label><input type="checkbox" name="permImagesEveryone"> Everyone</label>
+                                    <label><input type="checkbox" name="permImagesSub"> Subscriber</label>
+                                    <label><input type="checkbox" name="permImagesVIP" checked> VIP</label>
+                                    <label><input type="checkbox" name="permImagesMod" checked> Moderator</label>
+                                    <label><input type="checkbox" name="permImagesBroadcaster" checked> Broadcaster</label>
+                                </div>
                             </div>
 
                             <div class="config">
@@ -363,17 +363,17 @@
                                         class="slider"></span></label>
                             </div>
 
-                            <div class="config">
+                            <div class="config" style="align-items: flex-start;">
                                 <label>
-                                    YouTube Permission<br><small>Who can embed YouTube videos?</small>
+                                    YouTube Permission<br><small>Check roles that can embed YouTube.</small>
                                 </label>
-                                <select name="youTubeEmbedPermissionLevel">
-                                    <option value="10">Everyone</option>
-                                    <option value="15">Subscriber</option>
-                                    <option value="20" selected>VIP</option>
-                                    <option value="30">Moderator</option>
-                                    <option value="40">Broadcaster</option>
-                                </select>
+                                <div style="display: flex; flex-direction: column; text-align: right;">
+                                    <label><input type="checkbox" name="permYouTubeEveryone"> Everyone</label>
+                                    <label><input type="checkbox" name="permYouTubeSub"> Subscriber</label>
+                                    <label><input type="checkbox" name="permYouTubeVIP" checked> VIP</label>
+                                    <label><input type="checkbox" name="permYouTubeMod" checked> Moderator</label>
+                                    <label><input type="checkbox" name="permYouTubeBroadcaster" checked> Broadcaster</label>
+                                </div>
                             </div>
 
                             <div class="config">
