@@ -738,7 +738,7 @@ async function getKick7TVEmotes(userId) {
     const userSet = await fetch(`https://7tv.io/v3/users/kick/${userId}`);
 
     if (userSet.status === 404) {
-        console.debug("[Kick] 7TV Profile based on this Kick user was not found");
+        console.debug(`[Kick] 7TV Profile not found for user ${userId}. This is normal if the user has not linked 7TV to their Kick account.`);
         return null;
     }
 

@@ -62,13 +62,17 @@ const youtubeStatistics = `
 `;
 
 
-if (showYoutube) {
-    document.querySelector('#statistics').insertAdjacentHTML('beforeend', youtubeStatistics);
+document.addEventListener('DOMContentLoaded', () => {
+    if (showYoutube) {
+        document.querySelector('#statistics').insertAdjacentHTML('beforeend', youtubeStatistics);
 
-    if (showTwitchViewers == true) { document.querySelector('#youtube').style.display = ''; }
+        if (showYouTubeStatistics == true) { document.querySelector('#youtube').style.display = ''; }
 
-    registerPlatformHandlersToStreamerBot(youtubeMessageHandlers, '[YouTube]');
-}
+        console.debug('[YouTube][Debug] DOMContentLoaded fired');
+
+        registerPlatformHandlersToStreamerBot(youtubeMessageHandlers, '[YouTube]');
+    }
+});
 
 
 
